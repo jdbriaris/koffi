@@ -1,0 +1,17 @@
+$link-text: #337ab7;
+$link-hover: orange;
+
+body {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+}
+
+a {
+  color: $link-text;
+  text-decoration: none;
+  cursor: pointer;
+  &:hover, &:focus {
+    color: $link-hover;
+  }
+}
+

@@ -1,0 +1,26 @@
+<form class="form-container" [formGroup]="signInForm" novalidate (ngSubmit)="signIn(signInForm.value)">
+
+    <span class="form-title">Sign in</span>
+
+    <label class="form-label" for="email">Email</label>
+    <input class="form-input"
+           type="text" id="email"
+           formControlName="email">
+    <div class="form-error" *ngIf="formErrors.email">
+        {{ formErrors.email}}
+    </div>
+
+    <label class="form-label" for="password">Password</label>
+    <input class="form-input"
+           type="password" id="password"
+           formControlName="password">
+    <div class="form-error" *ngIf="formErrors.password">
+        {{ formErrors.password}}
+    </div>
+
+    <button class="form-button" type="submit">Sign in</button>
+
+    <br>New to xFit?
+    <button class="form-button" type="button" (click)="signUp()">Create your xFit account</button>
+
+</form>

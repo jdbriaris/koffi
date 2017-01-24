@@ -1,0 +1,71 @@
+// Colors
+$error-text: #FF0000;
+$border-focus: #66afe9;
+$border-hover: $border-focus;
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  max-width: 350px;
+  margin-right: auto;
+  margin-left: auto;
+
+  .form-title {
+    font-size: 32px;
+    font-weight: bold;
+    margin-left: 4px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+  }
+
+  .form-label {
+    @extend .form-title;
+    font-size: 18px;
+    margin-left: 4px;
+    margin-top: 20px;
+  }
+
+  .form-error {
+    @extend .form-title;
+    font-size: 14px;
+    color: $error-text;
+  }
+
+  .form-input {
+    height: 20px;
+    line-height: 1.42857143;
+    padding: 6px 10px;
+    font-size: 14px;
+    color: #555;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    &:focus {
+      border-color: $border-focus;
+    }
+  }
+
+  .form-button {
+    padding: 6px 12px;
+    margin-top: 20px;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: normal;
+    line-height: 1.42857143;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    &:hover {
+      border-color: $border-hover;
+    }
+  }
+}
+
+
+
+
+
