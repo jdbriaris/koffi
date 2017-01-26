@@ -4,8 +4,7 @@ import {AppComponent} from "./app.component";
 import {AppRoutingModule} from "./app-routing.module";
 import {FirebaseService} from "./services/firebase.service";
 import {SignInModule} from "./sign-in/sign-in.module";
-import {SignUpModule} from "./sign-up/sign-up.module";
-import {HomeModule} from "./home/home.module";
+import {RegisterModule} from "./register/register.module";
 import {AuthService} from "./services/auth.service";
 import {SignUpReviewModule} from "./sign-up-review/sign-up-review.module";
 
@@ -13,9 +12,8 @@ import {SignUpReviewModule} from "./sign-up-review/sign-up-review.module";
     imports: [
         BrowserModule,
         SignInModule,
-        SignUpModule,
+        RegisterModule,
         SignUpReviewModule,
-        HomeModule,
         AppRoutingModule
     ],
     declarations: [AppComponent],

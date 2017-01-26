@@ -8,10 +8,10 @@ import {AuthErrorCode, AuthError} from "../services/auth.error";
 
 @Component({
     moduleId: 'module.id',
-    templateUrl: 'sign-up.component.html'
+    templateUrl: 'register.component.html'
 })
-export class SignUpComponent implements OnInit {
-    signUpForm: FormGroup;
+export class RegisterComponent implements OnInit {
+    registerForm: FormGroup;
     formErrors = {
         name: '',
         email: '',
@@ -59,7 +59,7 @@ export class SignUpComponent implements OnInit {
             Validators.minLength(6)
         ]);
 
-        this.signUpForm = this.formBuilder.group({
+        this.registerForm = this.formBuilder.group({
             name: this.nameControl,
             email: this.emailControl,
             password: this.passwordControl
@@ -86,10 +86,10 @@ export class SignUpComponent implements OnInit {
         this.formErrors[error] = '';
     }
 
-    signUp(newUser: NewUser): void {
+    register(newUser: NewUser): void {
         this.validateForm();
 
-        if (this.signUpForm.invalid) return;
+        if (this.registerForm.invalid) return;
             this.authService.createUser(newUser).subscribe(
                 ()=> {
                     console.log('success');
@@ -115,7 +115,7 @@ export class SignUpComponent implements OnInit {
     };
 
     private validateForm() {
-        const form = this.signUpForm;
+        const form = this.registerForm;
         for (const field in this.formErrors) {
             const control: AbstractControl = form.get(field);
             for (const key in control.errors) {

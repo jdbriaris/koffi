@@ -80,8 +80,8 @@ export class SignInComponent implements OnInit {
         // });
     };
 
-    signUp(): void {
-        this.router.navigate(['/sign-up']);
+    register(): void {
+        this.router.navigate(['/register']);
     };
 }
 
