@@ -5,11 +5,11 @@ import {Observable} from "rxjs";
 import {AuthError, AuthErrorCode} from "./auth.error";
 
 const config = {
-    apiKey: "AIzaSyDs57dq6uprHErKIzoUdEQXNNPy0JZyvDg",
-    authDomain: "xfit-1274d.firebaseapp.com",
-    databaseURL: "https://xfit-1274d.firebaseio.com",
-    storageBucket: "xfit-1274d.appspot.com",
-    messagingSenderId: "854855017201"
+    apiKey: "AIzaSyB5RBALHF5YGi_TK0M-hVyuQdkmHWACQH0",
+    authDomain: "koffi-bd880.firebaseapp.com",
+    databaseURL: "https://koffi-bd880.firebaseio.com",
+    storageBucket: "koffi-bd880.appspot.com",
+    messagingSenderId: "154364068514"
 };
 
 const authErrors = {
@@ -25,6 +25,9 @@ export class FirebaseService {
     app: firebase.app.App = null;
 
     connect(): void {
+
+        console.log(config);
+
         this.app = firebase.initializeApp(config);
     };
 
@@ -50,6 +53,9 @@ export class FirebaseService {
                 });
         });
     };
+
+
+    //public signInWithEmailAndPassword()
 
     // private updateDisplayName(displayName: string): Observable<void> {
     //

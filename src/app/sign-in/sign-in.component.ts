@@ -78,6 +78,9 @@ export class SignInComponent implements OnInit {
         // this.authService.signIn().subscribe(() => {
         //     this.router.navigate(['/home']);
         // });
+
+        this.router.navigate(['/koffi']);
+
     };
 
     register(): void {

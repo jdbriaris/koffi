@@ -7,6 +7,7 @@ import {SignInModule} from "./sign-in/sign-in.module";
 import {RegisterModule} from "./register/register.module";
 import {AuthService} from "./services/auth.service";
 import {SignUpReviewModule} from "./sign-up-review/sign-up-review.module";
+import {KoffiModule} from "./koffi/koffi.module";
 
 @NgModule({
     imports: [
@@ -14,6 +15,7 @@ import {SignUpReviewModule} from "./sign-up-review/sign-up-review.module";
         SignInModule,
         RegisterModule,
         SignUpReviewModule,
+        KoffiModule,
         AppRoutingModule
     ],
     declarations: [AppComponent],
