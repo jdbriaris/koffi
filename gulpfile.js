@@ -3,6 +3,7 @@ var del = require('del');
 var nodemon = require('gulp-nodemon');
 var shell = require('gulp-shell');
 var browserSync = require('browser-sync').create();
+var ts = require('gulp-typescript');
 
 var port = 8080;
 
@@ -36,15 +37,34 @@ gulp.task('serve', function() {
                 proxy: 'localhost:' + port
             });
 
-            gulp.watch(paths.src + '/**/*.+(html|ts|scss)').on('change', gulp.series('webpack-app', browserSync.reload));
+            gulp.watch(paths.src + '/**/*.+(html|ts|scss)', '!/**/*.spec.ts').on('change', gulp.series('webpack-app', browserSync.reload));
         })
         .on('restart', function () {
             browserSync.reload();
         });
 });
 
-gulp.task('develop', gulp.series('clean', 'webpack', 'serve'));
+
 
 gulp.task('build', gulp.series('clean', 'webpack', shell.task('cordova build')));
 
 gulp.task('android', shell.task('cordova emulate android'));
+
+//region Tests
+
+gulp.task('transpile-tests', function() {
+    var tsProject = ts.createProject('tsconfig.json');
+    var tsResult = gulp.src('./src/**/*.spec.ts')
+        .pipe(tsProject());
+    return tsResult.js.pipe(gulp.dest('test/'));
+});
+
+gulp.task('watch-tests', function() {
+    gulp.watch('./src/**/*.spec.ts').on('change', gulp.series('transpile-tests'));
+});
+
+gulp.task('tests', gulp.parallel( shell.task('karma start'), gulp.series('transpile-tests', 'watch-tests')));
+
+//endregion
+
+gulp.task('develop', gulp.parallel('tests', gulp.series('clean', 'webpack', 'serve')));
