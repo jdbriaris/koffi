@@ -1,4 +1,3 @@
-///<reference path="../../../typings/globals/jasmine/index.d.ts"/>
 describe('1st tests', () => {
-    it('true is true', () => expect(true).toBe(true));
+    it('true is true', () => expect(true).toBe(false));
 });
