@@ -5,7 +5,8 @@
   "scripts": {
     "start": "webpack-dev-server --inline --progress --port 8080",
     "build": "rimraf www && webpack --config config/webpack.prod.js --progress --profile --bail",
-    "android": "cordova platform add android && cordova emulate android"
+    "android": "cordova platform add android && cordova emulate android",
+    "test": "karma start"
   },
   "dependencies": {
     "@angular/common": "~2.4.0",
@@ -33,11 +34,14 @@
     "html-webpack-plugin": "^2.28.0",
     "jasmine-core": "^2.5.2",
     "karma": "^1.4.1",
-    "karma-chrome-launcher": "^2.0.0",
     "karma-jasmine": "^1.1.0",
-    "karma-jasmine-html-reporter": "^0.2.2",
-    "karma-typescript-preprocessor": "^0.3.1",
+    "karma-phantomjs-launcher": "^1.0.2",
+    "karma-sourcemap-loader": "^0.3.7",
+    "karma-webpack": "^2.0.2",
     "node-sass": "^4.5.0",
+    "null-loader": "^0.1.1",
+    "phantomjs-prebuilt": "^2.1.14",
+    "raw-loader": "^0.5.1",
     "rimraf": "^2.5.4",
     "sass-loader": "^4.1.0",
     "style-loader": "^0.13.1",
