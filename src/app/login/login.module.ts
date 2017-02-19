@@ -1,6 +1,6 @@
 import {NgModule} from "@angular/core";
 import {CommonModule} from '@angular/common';
-import {SignInComponent} from "./sign-in.component";
+import {SignInComponent} from "./login.component";
 import {ReactiveFormsModule} from "@angular/forms";
 
 @NgModule({

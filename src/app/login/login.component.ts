@@ -11,7 +11,7 @@ interface SignInCredentials {
 
 @Component({
     moduleId: 'module.id',
-    templateUrl: 'sign-in.component.html'
+    templateUrl: 'login.component.html'
 })
 export class SignInComponent implements OnInit {
     public signInForm: FormGroup;

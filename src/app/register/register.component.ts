@@ -108,7 +108,7 @@ export class RegisterComponent implements OnInit {
                         default:
                             //TODO: Work out where to navigate to here
                             console.log(error.message);
-                            this.navigateTo('/sign-in');
+                            this.navigateTo('/login');
                             break;
                     }
                 });
@@ -134,6 +134,6 @@ export class RegisterComponent implements OnInit {
     }
 
     signIn(): void {
-        this.navigateTo('/sign-in');
+        this.navigateTo('/login');
     };
 }
