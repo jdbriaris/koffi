@@ -57,13 +57,13 @@ export class LoginComponent implements OnInit {
 
     private validateForm(): void {
         const form = this.loginForm;
-        for (const field in this.formErrors) {
-            const control: AbstractControl = form.get(field);
+         for (const field in this.formErrors) {
+             const control: AbstractControl = form.get(field);
             for (const key in control.errors) {
                 //TODO: Find more strongly-typed way of doing this
                 this.validationMessages[field][key]();
             }
-        }
+         }
     };
 
     private updateFormError(field: string, msg: string): void {
@@ -72,19 +72,19 @@ export class LoginComponent implements OnInit {
         });
     };
 
-    signIn(credentials: LoginCredentials): void {
+    logIn(credentials: LoginCredentials): void {
         this.validateForm();
 
-        // this.authService.signIn().subscribe(() => {
+        // this.authService.logIn().subscribe(() => {
         //     this.router.navigate(['/home']);
         // });
 
-        this.router.navigate(['/koffi']);
+        //this.router.navigate(['/koffi']);
 
     };
 
     register(): void {
-        this.router.navigate(['/register']);
+        //this.router.navigate(['/register']);
     };
 }
 

@@ -13,7 +13,7 @@ export class AuthService {
 
     constructor(private firebaseService: FirebaseService) {}
 
-    signIn(): Observable<boolean> {
+    logIn(): Observable<boolean> {
         return Observable.of(true).delay(1000).do(val => this.isLoggedIn = true);
     };
 

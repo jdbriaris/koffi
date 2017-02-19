@@ -1,26 +1,24 @@
-<form class="form-container" [formGroup]="loginForm" novalidate (ngSubmit)="signIn(loginForm.value)">
+<form class="form-container" [formGroup]="loginForm" novalidate (ngSubmit)="logIn(loginForm)">
 
-    <span class="form-title">Login</span>
+    <span class="form-title">Log in</span>
 
     <label class="form-label" for="email">Email</label>
     <input class="form-input"
            type="text" id="email"
            formControlName="email">
-    <div class="form-error" *ngIf="formErrors.email">
-        {{ formErrors.email}}
-    </div>
+    <div id="email-error" class="form-error">{{ formErrors.email}}</div>
 
     <label class="form-label" for="password">Password</label>
     <input class="form-input"
            type="password" id="password"
            formControlName="password">
-    <div class="form-error" *ngIf="formErrors.password">
+    <div id="password-error" class="form-error" *ngIf="formErrors.password">
         {{ formErrors.password}}
     </div>
 
-    <button class="form-button" type="submit">Sign in</button>
+    <button id="login-button" class="form-button" type="submit">Log in</button>
 
     <br>New to koffi?
-    <button class="form-button" type="button" (click)="register()">Create your koffi account</button>
+    <button id="register-button" class="form-button" type="button" (click)="register()">Create your koffi account</button>
 
 </form>
