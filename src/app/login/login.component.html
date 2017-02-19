@@ -1,4 +1,4 @@
-<form class="form-container" [formGroup]="LoginForm" novalidate (ngSubmit)="signIn(LoginForm.value)">
+<form class="form-container" [formGroup]="loginForm" novalidate (ngSubmit)="signIn(loginForm.value)">
 
     <span class="form-title">Login</span>
 
@@ -20,7 +20,7 @@
 
     <button class="form-button" type="submit">Sign in</button>
 
-    <br>New to xFit?
+    <br>New to koffi?
     <button class="form-button" type="button" (click)="register()">Create your koffi account</button>
 
 </form>

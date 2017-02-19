@@ -9,16 +9,16 @@ import {NewUser} from "../domain/user.interface";
 @Injectable()
 export class AuthService {
 
-    isSignedIn: boolean = false;
+    isLoggedIn: boolean = false;
 
     constructor(private firebaseService: FirebaseService) {}
 
     signIn(): Observable<boolean> {
-        return Observable.of(true).delay(1000).do(val => this.isSignedIn = true);
+        return Observable.of(true).delay(1000).do(val => this.isLoggedIn = true);
     };
 
     signOut(): void {
-        this.isSignedIn = false;
+        this.isLoggedIn = false;
     };
 
     createUser(newUser: NewUser): Observable<NewUser> {

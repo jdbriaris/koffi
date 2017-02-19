@@ -4,7 +4,7 @@ import {AuthService} from "../services/auth.service";
 import {FormGroup, FormBuilder, FormControl, Validators, AbstractControl} from "@angular/forms";
 import '../styles/forms.scss';
 
-interface SignInCredentials {
+interface LoginCredentials {
     email: string,
     password: string
 }
@@ -13,8 +13,8 @@ interface SignInCredentials {
     moduleId: 'module.id',
     templateUrl: 'login.component.html'
 })
-export class SignInComponent implements OnInit {
-    public signInForm: FormGroup;
+export class LoginComponent implements OnInit {
+    public loginForm: FormGroup;
     public formErrors = {
         email: '',
         password: ''
@@ -49,14 +49,14 @@ export class SignInComponent implements OnInit {
         this.passwordControl = new FormControl('', [
             Validators.required
         ]);
-        this.signInForm = this.formBuilder.group({
+        this.loginForm = this.formBuilder.group({
             email: this.emailControl,
             password: this.passwordControl
         });
     };
 
     private validateForm(): void {
-        const form = this.signInForm;
+        const form = this.loginForm;
         for (const field in this.formErrors) {
             const control: AbstractControl = form.get(field);
             for (const key in control.errors) {
@@ -72,7 +72,7 @@ export class SignInComponent implements OnInit {
         });
     };
 
-    signIn(credentials: SignInCredentials): void {
+    signIn(credentials: LoginCredentials): void {
         this.validateForm();
 
         // this.authService.signIn().subscribe(() => {
