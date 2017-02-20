@@ -14,12 +14,35 @@ class LoginPage {
     passwordInput: HTMLInputElement;
 
     constructor(private fixture: ComponentFixture<LoginComponent>) {
+        this.queryDomElements(fixture);
+    }
+
+    private queryDomElements(fixture: ComponentFixture<LoginComponent>) {
         this.loginForm = fixture.debugElement.query(By.css('.form-container'));
         this.loginButton = fixture.debugElement.query(By.css('#login-button'));
         this.registerButton = fixture.debugElement.query(By.css('#register-button'));
         this.emailInput = fixture.debugElement.query(By.css('#email')).nativeElement;
         this.passwordInput = fixture.debugElement.query(By.css('#password')).nativeElement;
     }
+
+    userEntersEmail(email: string) : LoginPage {
+        this.emailInput.value = email;
+        this.emailInput.dispatchEvent(new Event('input'));
+        return this;
+    }
+
+    userEntersPassword(password: string) : LoginPage {
+        this.passwordInput.value = password;
+        this.passwordInput.dispatchEvent(new Event('input'));
+        return this;
+    }
+
+    userPressesLogIn() : LoginPage {
+        this.loginForm.triggerEventHandler('ngSubmit', this.loginForm);
+        return this;
+    }
+
+
 }
 
 
@@ -31,7 +54,7 @@ describe('LoginComponent', () => {
     let el: HTMLElement;
     let loginPage: LoginPage;
 
-    let emailError: HTMLElement;
+    //let emailError: HTMLElement;
 
     let authServiceStub = {
         isLoggedIn: false
@@ -56,39 +79,31 @@ describe('LoginComponent', () => {
         fixture = TestBed.createComponent(LoginComponent);
         component = fixture.componentInstance;
         loginPage = new LoginPage(fixture);
+        fixture.detectChanges(); // calls ngOnInit
     });
 
     it('it should have title displaying "Log in"', () => {
-        fixture.detectChanges();
         de = fixture.debugElement.query(By.css('.form-title'));
         el = de.nativeElement;
         expect(el.textContent).toContain('Log in');
     });
 
     it('should have button displaying "Log in"', () => {
-        fixture.detectChanges();
         expect(loginPage.loginButton.nativeElement.textContent).toContain('Log in');
     });
 
-    it('should display error when email not present', () => {
-        // This will build the form
+    it('should display error when email not set and user attempts to login', () => {
+        loginPage.userEntersEmail('').userPressesLogIn();
         fixture.detectChanges();
-
-        // simulate user entering email into email input box
-        loginPage.emailInput.value = '';
-        loginPage.emailInput.dispatchEvent(new Event('input'));
-
-        // simulate user pressing login button
-        loginPage.loginForm.triggerEventHandler('ngSubmit', loginPage.loginForm);
-
-        // ngIf should be showing element by now
-        emailError = fixture.debugElement.query(By.css('#email-error')).nativeElement;
-
-        // wait for form to be updated
-        fixture.detectChanges();
-
-        // the error message we expect
+        let emailError = fixture.debugElement.query(By.css('#email-error')).nativeElement;
         expect(emailError.textContent).toBe('Enter your email address');
+    });
+
+    it('should display error when password not set and user attempts to login', () => {
+        loginPage.userEntersPassword('').userPressesLogIn();
+        fixture.detectChanges();
+        let passwordError = fixture.debugElement.query(By.css('#password-error')).nativeElement;
+        expect(passwordError.textContent).toBe('Enter your password');
     });
 
 });
