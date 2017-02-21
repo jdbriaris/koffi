@@ -1,10 +1,10 @@
-import {Component, OnInit, NgZone} from '@angular/core';
+import {Component, OnInit, NgZone, Inject} from '@angular/core';
 import {Router} from '@angular/router';
-import {AuthService} from "../services/auth.service";
 import {NewUser} from "../domain/user.interface";
 import {FormGroup, FormBuilder, Validators, FormControl, AbstractControl} from "@angular/forms";
 import '../styles/forms.scss';
 import {AuthErrorCode, AuthError} from "../services/auth.error";
+import {AuthService, AUTH_SERVICE} from "../services/auth.service";
 
 @Component({
     moduleId: 'module.id',
@@ -36,9 +36,12 @@ export class RegisterComponent implements OnInit {
     private passwordControl: FormControl;
 
     constructor(
+
+        @Inject(AUTH_SERVICE) private authService: AuthService,
+
         private formBuilder: FormBuilder,
         private router: Router,
-        private authService: AuthService,
+
         private ngZone: NgZone
     ) {}
 

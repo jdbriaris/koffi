@@ -1,8 +1,8 @@
-import {Component, OnInit, NgZone} from '@angular/core';
+import {Component, OnInit, NgZone, Inject} from '@angular/core';
 import {Router} from '@angular/router';
-import {AuthService} from "../services/auth.service";
 import {FormGroup, FormBuilder, FormControl, Validators, AbstractControl} from "@angular/forms";
 import '../styles/forms.scss';
+import {AuthService, AUTH_SERVICE} from "../services/auth.service";
 
 interface LoginCredentials {
     email: string,
@@ -33,7 +33,7 @@ export class LoginComponent implements OnInit {
 
     constructor(
         private formBuilder: FormBuilder,
-        private authService: AuthService,
+        @Inject(AUTH_SERVICE) private authService: AuthService,
         private router: Router,
         private zone: NgZone
     ) {}
@@ -60,7 +60,6 @@ export class LoginComponent implements OnInit {
          for (const field in this.formErrors) {
              const control: AbstractControl = form.get(field);
             for (const key in control.errors) {
-                //TODO: Find more strongly-typed way of doing this
                 this.validationMessages[field][key]();
             }
          }

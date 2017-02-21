@@ -5,9 +5,10 @@ import {AppRoutingModule} from "./app-routing.module";
 import {FirebaseService} from "./services/firebase.service";
 import {LoginModule} from "./login/login.module";
 import {RegisterModule} from "./register/register.module";
-import {AuthService} from "./services/auth.service";
+import {FirebaseAuthService} from "./services/firebase.auth.service";
 import {SignUpReviewModule} from "./sign-up-review/sign-up-review.module";
 import {KoffiModule} from "./koffi/koffi.module";
+import {AUTH_SERVICE} from "./services/auth.service";
 
 @NgModule({
     imports: [
@@ -20,6 +21,9 @@ import {KoffiModule} from "./koffi/koffi.module";
     ],
     declarations: [AppComponent],
     bootstrap: [AppComponent],
-    providers: [AuthService,FirebaseService]
+    providers: [
+        FirebaseService,
+        { provide: AUTH_SERVICE, useValue: FirebaseAuthService }
+    ]
 })
 export class AppModule{}

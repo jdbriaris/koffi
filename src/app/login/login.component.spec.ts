@@ -3,8 +3,9 @@ import {LoginComponent} from "./login.component";
 import {DebugElement} from "@angular/core";
 import {By} from "@angular/platform-browser";
 import {ReactiveFormsModule} from "@angular/forms";
-import {AuthService} from "../services/auth.service";
+import {FirebaseAuthService} from "../services/firebase.auth.service";
 import {Router} from "@angular/router";
+import {AUTH_SERVICE} from "../services/auth.service";
 
 class LoginPage {
     loginForm: DebugElement;
@@ -41,10 +42,7 @@ class LoginPage {
         this.loginForm.triggerEventHandler('ngSubmit', this.loginForm);
         return this;
     }
-
-
 }
-
 
 describe('LoginComponent', () => {
 
@@ -53,12 +51,6 @@ describe('LoginComponent', () => {
     let de: DebugElement;
     let el: HTMLElement;
     let loginPage: LoginPage;
-
-    //let emailError: HTMLElement;
-
-    let authServiceStub = {
-        isLoggedIn: false
-    };
 
     let routerStub = {
         navigateByUrl(url: string) { return url; }
@@ -69,7 +61,7 @@ describe('LoginComponent', () => {
             imports: [ ReactiveFormsModule ],
             declarations: [ LoginComponent ],
             providers: [
-                {provide: AuthService, useValue: authServiceStub},
+                {provide: AUTH_SERVICE, useValue: FirebaseAuthService},
                 {provide: Router, useValue: routerStub}
             ]
         });
