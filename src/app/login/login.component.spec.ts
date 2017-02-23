@@ -8,6 +8,7 @@ import {AUTH_SERVICE, AuthService} from "../services/auth.service";
 import {Observable} from "rxjs/Observable";
 import {NewUser} from "../domain/user.interface";
 import {BehaviorSubject} from "rxjs/BehaviorSubject";
+import Spy = jasmine.Spy;
 
 class LoginPage {
     loginForm: DebugElement;
@@ -64,7 +65,7 @@ class AuthServiceStub implements AuthService {
     // }
 }
 
-describe('LoginComponent', () => {
+describe('A LoginComponent', () => {
 
     let component: LoginComponent;
     let fixture: ComponentFixture<LoginComponent>;
@@ -94,37 +95,58 @@ describe('LoginComponent', () => {
         fixture.detectChanges(); // calls ngOnInit
     });
 
-    // it('it should have title displaying "Log in"', () => {
-    //     de = fixture.debugElement.query(By.css('.form-title'));
-    //     el = de.nativeElement;
-    //     expect(el.textContent).toContain('Log in');
-    // });
-    //
-    // it('should have button displaying "Log in"', () => {
-    //     expect(loginPage.loginButton.nativeElement.textContent).toContain('Log in');
-    // });
-    //
-    // it('should display error when email not set and user attempts to login', () => {
-    //     loginPage.userEntersEmail('').userPressesLogIn();
-    //     fixture.detectChanges();
-    //     let emailError = fixture.debugElement.query(By.css('#email-error')).nativeElement;
-    //     expect(emailError.textContent).toBe('Enter your email address');
-    // });
-    //
-    // it('should display error when password not set and user attempts to login', () => {
-    //     loginPage.userEntersPassword('').userPressesLogIn();
-    //     fixture.detectChanges();
-    //     let passwordError = fixture.debugElement.query(By.css('#password-error')).nativeElement;
-    //     expect(passwordError.textContent).toBe('Enter your password');
-    // });
+    it('should have a title displaying "Log in"', () => {
+        de = fixture.debugElement.query(By.css('.form-title'));
+        el = de.nativeElement;
+        expect(el.textContent).toContain('Log in');
+    });
 
-    it('should not attempt to log in on auth service if user not entered username ', () => {
-        let authService = fixture.debugElement.injector.get(AUTH_SERVICE);
-        spyOn(authService, 'logIn').and.callThrough();
+    it('should have a button displaying "Log in"', () => {
+        expect(loginPage.loginButton.nativeElement.textContent).toContain('Log in');
+    });
 
+    it('should display an error when email not set and user attempts to login', () => {
+        loginPage.userEntersEmail('').userPressesLogIn();
+        fixture.detectChanges();
+        let emailError = fixture.debugElement.query(By.css('#email-error')).nativeElement;
+        expect(emailError.textContent).toBe('Enter your email address');
+    });
+
+    it('should display an error when password not set and user attempts to login', () => {
         loginPage.userEntersPassword('').userPressesLogIn();
+        fixture.detectChanges();
+        let passwordError = fixture.debugElement.query(By.css('#password-error')).nativeElement;
+        expect(passwordError.textContent).toBe('Enter your password');
+    });
 
-        expect(authService.logIn.calls.any()).toEqual(false);
+    describe('calls logIn on AuthService', () => {
+        let authService: AuthService;
+        let authServiceSpy: Spy;
+
+        beforeEach(() => {
+            authService = fixture.debugElement.injector.get(AUTH_SERVICE);
+            authServiceSpy = spyOn(authService, 'logIn').and.callThrough();
+        });
+
+        it('0 times if user has not entered email', () => {
+            loginPage.userEntersEmail('').userEntersPassword('password').userPressesLogIn();
+            expect(authServiceSpy.calls.any()).toEqual(false);
+        });
+
+        it('0 times if user has not entered password', () => {
+            loginPage.userEntersEmail('email').userEntersPassword('').userPressesLogIn();
+            expect(authServiceSpy.calls.any()).toEqual(false);
+        });
+
+        it('0 times if user has not entered email or password', () => {
+            loginPage.userEntersEmail('').userEntersPassword('').userPressesLogIn();
+            expect(authServiceSpy.calls.any()).toEqual(false);
+        });
+
+        it('1 time if user has entered email and password', () => {
+            loginPage.userEntersEmail('email').userEntersPassword('password').userPressesLogIn();
+            expect(authServiceSpy).toHaveBeenCalledTimes(1);
+        });
     });
 
 });

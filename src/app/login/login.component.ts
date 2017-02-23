@@ -55,20 +55,14 @@ export class LoginComponent implements OnInit {
         });
     };
 
-    private validateForm(): boolean {
-        let isValid = true;
+    private validateForm(): void {
         const form = this.loginForm;
          for (const field in this.formErrors) {
              const control: AbstractControl = form.get(field);
              for (const key in control.errors) {
-
-                 isValid = key.length > 0;
-
                  this.validationMessages[field][key]();
-
              }
          }
-         return isValid;
     };
 
     private updateFormError(field: string, msg: string): void {
@@ -79,8 +73,11 @@ export class LoginComponent implements OnInit {
 
     logIn(): void {
 
-        if(!this.validateForm())
+        this.validateForm();
+
+        if(this.loginForm.invalid){
             return;
+        }
 
         this.authService.logIn().subscribe(() => {
             // this.router.navigate(['/home']);
