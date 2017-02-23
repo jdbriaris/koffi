@@ -55,14 +55,20 @@ export class LoginComponent implements OnInit {
         });
     };
 
-    private validateForm(): void {
+    private validateForm(): boolean {
+        let isValid = true;
         const form = this.loginForm;
          for (const field in this.formErrors) {
              const control: AbstractControl = form.get(field);
-            for (const key in control.errors) {
-                this.validationMessages[field][key]();
-            }
+             for (const key in control.errors) {
+
+                 isValid = key.length > 0;
+
+                 this.validationMessages[field][key]();
+
+             }
          }
+         return isValid;
     };
 
     private updateFormError(field: string, msg: string): void {
@@ -71,15 +77,16 @@ export class LoginComponent implements OnInit {
         });
     };
 
-    logIn(credentials: LoginCredentials): void {
-        this.validateForm();
+    logIn(): void {
 
-        // this.authService.logIn().subscribe(() => {
-        //     this.router.navigate(['/home']);
-        // });
+        if(!this.validateForm())
+            return;
+
+        this.authService.logIn().subscribe(() => {
+            // this.router.navigate(['/home']);
+        });
 
         //this.router.navigate(['/koffi']);
-
     };
 
     register(): void {

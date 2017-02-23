@@ -23,7 +23,7 @@ import {AUTH_SERVICE} from "./services/auth.service";
     bootstrap: [AppComponent],
     providers: [
         FirebaseService,
-        { provide: AUTH_SERVICE, useValue: FirebaseAuthService }
+        { provide: AUTH_SERVICE, useClass: FirebaseAuthService }
     ]
 })
 export class AppModule{}

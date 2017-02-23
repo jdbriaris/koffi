@@ -1,11 +1,13 @@
 import {ComponentFixture, TestBed, async} from '@angular/core/testing';
 import {LoginComponent} from "./login.component";
-import {DebugElement} from "@angular/core";
+import {DebugElement, Injectable, Inject} from "@angular/core";
 import {By} from "@angular/platform-browser";
 import {ReactiveFormsModule} from "@angular/forms";
-import {FirebaseAuthService} from "../services/firebase.auth.service";
 import {Router} from "@angular/router";
-import {AUTH_SERVICE} from "../services/auth.service";
+import {AUTH_SERVICE, AuthService} from "../services/auth.service";
+import {Observable} from "rxjs/Observable";
+import {NewUser} from "../domain/user.interface";
+import {BehaviorSubject} from "rxjs/BehaviorSubject";
 
 class LoginPage {
     loginForm: DebugElement;
@@ -44,6 +46,24 @@ class LoginPage {
     }
 }
 
+@Injectable()
+class AuthServiceStub implements AuthService {
+
+    private subject = new BehaviorSubject(true);
+    params = this.subject.asObservable();
+
+    logIn(): Observable<boolean> {
+        return this.params;
+    }
+
+    logOut(): void {
+    }
+
+    // createUser(newUser: NewUser): Observable<NewUser> {
+    //     return undefined;
+    // }
+}
+
 describe('LoginComponent', () => {
 
     let component: LoginComponent;
@@ -61,7 +81,7 @@ describe('LoginComponent', () => {
             imports: [ ReactiveFormsModule ],
             declarations: [ LoginComponent ],
             providers: [
-                {provide: AUTH_SERVICE, useValue: FirebaseAuthService},
+                {provide: AUTH_SERVICE, useClass: AuthServiceStub},
                 {provide: Router, useValue: routerStub}
             ]
         });
@@ -74,28 +94,37 @@ describe('LoginComponent', () => {
         fixture.detectChanges(); // calls ngOnInit
     });
 
-    it('it should have title displaying "Log in"', () => {
-        de = fixture.debugElement.query(By.css('.form-title'));
-        el = de.nativeElement;
-        expect(el.textContent).toContain('Log in');
-    });
+    // it('it should have title displaying "Log in"', () => {
+    //     de = fixture.debugElement.query(By.css('.form-title'));
+    //     el = de.nativeElement;
+    //     expect(el.textContent).toContain('Log in');
+    // });
+    //
+    // it('should have button displaying "Log in"', () => {
+    //     expect(loginPage.loginButton.nativeElement.textContent).toContain('Log in');
+    // });
+    //
+    // it('should display error when email not set and user attempts to login', () => {
+    //     loginPage.userEntersEmail('').userPressesLogIn();
+    //     fixture.detectChanges();
+    //     let emailError = fixture.debugElement.query(By.css('#email-error')).nativeElement;
+    //     expect(emailError.textContent).toBe('Enter your email address');
+    // });
+    //
+    // it('should display error when password not set and user attempts to login', () => {
+    //     loginPage.userEntersPassword('').userPressesLogIn();
+    //     fixture.detectChanges();
+    //     let passwordError = fixture.debugElement.query(By.css('#password-error')).nativeElement;
+    //     expect(passwordError.textContent).toBe('Enter your password');
+    // });
 
-    it('should have button displaying "Log in"', () => {
-        expect(loginPage.loginButton.nativeElement.textContent).toContain('Log in');
-    });
+    it('should not attempt to log in on auth service if user not entered username ', () => {
+        let authService = fixture.debugElement.injector.get(AUTH_SERVICE);
+        spyOn(authService, 'logIn').and.callThrough();
 
-    it('should display error when email not set and user attempts to login', () => {
-        loginPage.userEntersEmail('').userPressesLogIn();
-        fixture.detectChanges();
-        let emailError = fixture.debugElement.query(By.css('#email-error')).nativeElement;
-        expect(emailError.textContent).toBe('Enter your email address');
-    });
-
-    it('should display error when password not set and user attempts to login', () => {
         loginPage.userEntersPassword('').userPressesLogIn();
-        fixture.detectChanges();
-        let passwordError = fixture.debugElement.query(By.css('#password-error')).nativeElement;
-        expect(passwordError.textContent).toBe('Enter your password');
+
+        expect(authService.logIn.calls.any()).toEqual(false);
     });
 
 });

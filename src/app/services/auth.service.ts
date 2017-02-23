@@ -7,5 +7,5 @@ export let AUTH_SERVICE = new OpaqueToken('auth.service');
 export interface AuthService {
     logIn(): Observable<boolean>;
     logOut(): void;
-    createUser(newUser: NewUser): Observable<NewUser>;
+    //createUser(newUser: NewUser): Observable<NewUser>;
 }

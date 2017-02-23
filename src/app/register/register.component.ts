@@ -36,12 +36,9 @@ export class RegisterComponent implements OnInit {
     private passwordControl: FormControl;
 
     constructor(
-
         @Inject(AUTH_SERVICE) private authService: AuthService,
-
         private formBuilder: FormBuilder,
         private router: Router,
-
         private ngZone: NgZone
     ) {}
 
@@ -93,28 +90,28 @@ export class RegisterComponent implements OnInit {
         this.validateForm();
 
         if (this.registerForm.invalid) return;
-            this.authService.createUser(newUser).subscribe(
-                ()=> {
-                    console.log('success');
-                },
-                (error: AuthError) => {
-                    switch (error.code){
-                        case AuthErrorCode.EmailInUse:
-                            this.navigateTo('/sign-up-review');
-                            break;
-                        case AuthErrorCode.InvalidEmail:
-                            this.updateFormError('email',   'Enter a valid email address');
-                            break;
-                        case AuthErrorCode.InvalidPassword:
-                            this.updateFormError('password', 'Enter a stronger password');
-                            break;
-                        default:
-                            //TODO: Work out where to navigate to here
-                            console.log(error.message);
-                            this.navigateTo('/login');
-                            break;
-                    }
-                });
+            // this.authService.createUser(newUser).subscribe(
+            //     ()=> {
+            //         console.log('success');
+            //     },
+            //     (error: AuthError) => {
+            //         switch (error.code){
+            //             case AuthErrorCode.EmailInUse:
+            //                 this.navigateTo('/sign-up-review');
+            //                 break;
+            //             case AuthErrorCode.InvalidEmail:
+            //                 this.updateFormError('email',   'Enter a valid email address');
+            //                 break;
+            //             case AuthErrorCode.InvalidPassword:
+            //                 this.updateFormError('password', 'Enter a stronger password');
+            //                 break;
+            //             default:
+            //                 //TODO: Work out where to navigate to here
+            //                 console.log(error.message);
+            //                 this.navigateTo('/login');
+            //                 break;
+            //         }
+            //     });
     };
 
     private validateForm() {

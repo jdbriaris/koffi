@@ -22,7 +22,7 @@ export class FirebaseAuthService implements AuthService {
         this.isLoggedIn = false;
     };
 
-    createUser(newUser: NewUser): Observable<NewUser> {
-        return this.firebaseService.createUser(newUser);
-    };
+    // createUser(newUser: NewUser): Observable<NewUser> {
+    //     return this.firebaseService.createUser(newUser);
+    // };
 }
