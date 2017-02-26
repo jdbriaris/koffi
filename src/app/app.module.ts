@@ -7,7 +7,7 @@ import {LoginModule} from "./login/login.module";
 import {RegisterModule} from "./register/register.module";
 import {FirebaseAuthService} from "./services/firebase.auth.service";
 import {SignUpReviewModule} from "./sign-up-review/sign-up-review.module";
-import {KoffiModule} from "./koffi/koffi.module";
+import {HomeModule} from "./home/home.module";
 import {AUTH_SERVICE} from "./services/auth.service";
 
 @NgModule({
@@ -16,7 +16,7 @@ import {AUTH_SERVICE} from "./services/auth.service";
         LoginModule,
         RegisterModule,
         SignUpReviewModule,
-        KoffiModule,
+        HomeModule,
         AppRoutingModule
     ],
     declarations: [AppComponent],

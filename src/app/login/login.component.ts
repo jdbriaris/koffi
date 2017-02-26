@@ -88,7 +88,7 @@ export class LoginComponent implements OnInit {
         this.authService.logIn().subscribe((result: LogInResult) => {
             switch (result){
                 case LogInResult.Success:
-                    this.router.navigate(['/koffi']);
+                    this.router.navigate(['/home']);
                     break;
                 case LogInResult.Failed:
                     this.updateLogInError('There was a problem logging in');

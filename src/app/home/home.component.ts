@@ -2,9 +2,9 @@ import {Component} from '@angular/core';
 
 @Component({
     moduleId: 'module.id',
-    templateUrl: './koffi.component.html'
+    templateUrl: 'home.component.html'
 })
-export class KoffiComponent{
+export class HomeComponent{
 
     signOut(): void {
         //TODO: Implement sign out procedure

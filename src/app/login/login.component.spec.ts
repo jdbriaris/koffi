@@ -187,7 +187,7 @@ describe('A LoginComponent', () => {
                 authService.setLogInSuccessful(LogInResult.Success);
                 loginPage.userEntersEmail('email').userEntersPassword('password').userPressesLogIn();
                 expect(routerSpy).toHaveBeenCalledTimes(1);
-                expect(routerSpy).toHaveBeenCalledWith(['/koffi']);
+                expect(routerSpy).toHaveBeenCalledWith(['/home']);
             });
 
             it('register when user has clicked to create an account', () => {
@@ -197,7 +197,5 @@ describe('A LoginComponent', () => {
             });
         });
     });
-
-
 
 });

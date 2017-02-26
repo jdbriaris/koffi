@@ -1,12 +1,12 @@
-import { NgModule } from '@angular/core';
+import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from "@angular/router";
-import {KoffiComponent} from "./koffi.component";
+import {HomeComponent} from "./home.component";
 import {AuthGuard} from "../services/auth-guard.service";
 
 const routes: Routes = [
     {
-        path: 'koffi',
-        component: KoffiComponent,
+        path: 'home',
+        component: HomeComponent,
         canActivate: [AuthGuard]
     }
 ];
@@ -15,4 +15,4 @@ const routes: Routes = [
     imports: [RouterModule.forChild(routes)],
     exports: [RouterModule]
 })
-export class KoffiRoutingModule{}
+export class HomeRoutingModule{}
