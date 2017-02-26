@@ -1,12 +1,11 @@
 import {ComponentFixture, TestBed, async} from '@angular/core/testing';
 import {LoginComponent} from "./login.component";
-import {DebugElement, Injectable, Inject} from "@angular/core";
+import {DebugElement, Injectable} from "@angular/core";
 import {By} from "@angular/platform-browser";
 import {ReactiveFormsModule} from "@angular/forms";
 import {Router} from "@angular/router";
-import {AUTH_SERVICE, AuthService} from "../services/auth.service";
+import {AUTH_SERVICE, AuthService, LogInResult} from "../services/auth.service";
 import {Observable} from "rxjs/Observable";
-import {NewUser} from "../domain/user.interface";
 import {BehaviorSubject} from "rxjs/BehaviorSubject";
 import Spy = jasmine.Spy;
 
@@ -29,40 +28,49 @@ class LoginPage {
         this.passwordInput = fixture.debugElement.query(By.css('#password')).nativeElement;
     }
 
-    userEntersEmail(email: string) : LoginPage {
+    userEntersEmail(email: string): LoginPage {
         this.emailInput.value = email;
         this.emailInput.dispatchEvent(new Event('input'));
         return this;
     }
 
-    userEntersPassword(password: string) : LoginPage {
+    userEntersPassword(password: string): LoginPage {
         this.passwordInput.value = password;
         this.passwordInput.dispatchEvent(new Event('input'));
         return this;
     }
 
-    userPressesLogIn() : LoginPage {
+    userPressesLogIn(): LoginPage {
         this.loginForm.triggerEventHandler('ngSubmit', this.loginForm);
+        return this;
+    }
+
+    userPressesRegisterButton(): LoginPage {
+        this.registerButton.triggerEventHandler('click', null);
         return this;
     }
 }
 
 @Injectable()
 class AuthServiceStub implements AuthService {
-
-    private subject = new BehaviorSubject(true);
+    private subject = new BehaviorSubject(LogInResult.Failed);
     params = this.subject.asObservable();
 
-    logIn(): Observable<boolean> {
+    logIn(): Observable<LogInResult> {
         return this.params;
     }
 
     logOut(): void {
     }
 
-    // createUser(newUser: NewUser): Observable<NewUser> {
-    //     return undefined;
-    // }
+    setLogInSuccessful(success: LogInResult){
+        this.subject.next(success);
+    }
+}
+
+@Injectable()
+class RouterStub {
+    navigate() {};
 }
 
 describe('A LoginComponent', () => {
@@ -73,17 +81,13 @@ describe('A LoginComponent', () => {
     let el: HTMLElement;
     let loginPage: LoginPage;
 
-    let routerStub = {
-        navigateByUrl(url: string) { return url; }
-    };
-
     beforeEach(async(() => {
         TestBed.configureTestingModule({
             imports: [ ReactiveFormsModule ],
             declarations: [ LoginComponent ],
             providers: [
                 {provide: AUTH_SERVICE, useClass: AuthServiceStub},
-                {provide: Router, useValue: routerStub}
+                {provide: Router, useClass: RouterStub}
             ]
         });
     }));
@@ -119,8 +123,15 @@ describe('A LoginComponent', () => {
         expect(passwordError.textContent).toBe('Enter your password');
     });
 
+    it('should display an error when password not set and user attempts to login', () => {
+        loginPage.userEntersPassword('').userPressesLogIn();
+        fixture.detectChanges();
+        let passwordError = fixture.debugElement.query(By.css('#password-error')).nativeElement;
+        expect(passwordError.textContent).toBe('Enter your password');
+    });
+
     describe('calls logIn on AuthService', () => {
-        let authService: AuthService;
+        let authService: AuthServiceStub;
         let authServiceSpy: Spy;
 
         beforeEach(() => {
@@ -147,6 +158,46 @@ describe('A LoginComponent', () => {
             loginPage.userEntersEmail('email').userEntersPassword('password').userPressesLogIn();
             expect(authServiceSpy).toHaveBeenCalledTimes(1);
         });
+
+        it('and shows log in error if log in failed', () => {
+            authService.setLogInSuccessful(LogInResult.Failed);
+            loginPage.userEntersEmail('email').userEntersPassword('password').userPressesLogIn();
+            fixture.detectChanges();
+            let passwordError = fixture.debugElement.query(By.css('#login-error')).nativeElement;
+            expect(passwordError.textContent).toBe('There was a problem logging in');
+        });
+
+        it('and removes entered password if log in failed', () => {
+            authService.setLogInSuccessful(LogInResult.Failed);
+            loginPage.userEntersEmail('email').userEntersPassword('password').userPressesLogIn();
+            fixture.detectChanges();
+            expect(loginPage.passwordInput.value).toBe('');
+        });
+
+        describe('and navigates to', () => {
+            let router: RouterStub;
+            let routerSpy: Spy;
+
+            beforeEach(() => {
+                router = fixture.debugElement.injector.get(Router);
+                routerSpy = spyOn(router, 'navigate').and.callThrough();
+            });
+
+            it('home when log in successful', () => {
+                authService.setLogInSuccessful(LogInResult.Success);
+                loginPage.userEntersEmail('email').userEntersPassword('password').userPressesLogIn();
+                expect(routerSpy).toHaveBeenCalledTimes(1);
+                expect(routerSpy).toHaveBeenCalledWith(['/koffi']);
+            });
+
+            it('register when user has clicked to create an account', () => {
+                loginPage.userPressesRegisterButton();
+                expect(routerSpy).toHaveBeenCalledTimes(1);
+                expect(routerSpy).toHaveBeenCalledWith(['/register']);
+            });
+        });
     });
+
+
 
 });

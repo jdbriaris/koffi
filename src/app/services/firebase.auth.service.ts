@@ -5,7 +5,7 @@ import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/delay';
 import {FirebaseService} from "./firebase.service";
 import {NewUser} from "../domain/user.interface";
-import {AuthService} from "./auth.service";
+import {AuthService, LogInResult} from "./auth.service";
 
 @Injectable()
 export class FirebaseAuthService implements AuthService {
@@ -14,8 +14,8 @@ export class FirebaseAuthService implements AuthService {
 
     constructor(private firebaseService: FirebaseService) {}
 
-    logIn(): Observable<boolean> {
-        return Observable.of(true).delay(1000).do(val => this.isLoggedIn = true);
+    logIn(): Observable<LogInResult> {
+        return Observable.of(LogInResult.Failed).delay(1000).do(val => this.isLoggedIn = true);
     };
 
     logOut(): void {

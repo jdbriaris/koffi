@@ -2,6 +2,8 @@
 
     <span class="form-title">Log in</span>
 
+    <div id="login-error" class="form-error" *ngIf="logInError">{{logInError}}</div>
+
     <label class="form-label" for="email">Email</label>
     <input class="form-input"
            type="text" id="email"

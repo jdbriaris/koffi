@@ -2,7 +2,7 @@ import {Component, OnInit, NgZone, Inject} from '@angular/core';
 import {Router} from '@angular/router';
 import {FormGroup, FormBuilder, FormControl, Validators, AbstractControl} from "@angular/forms";
 import '../styles/forms.scss';
-import {AuthService, AUTH_SERVICE} from "../services/auth.service";
+import {AuthService, AUTH_SERVICE, LogInResult} from "../services/auth.service";
 
 interface LoginCredentials {
     email: string,
@@ -19,6 +19,7 @@ export class LoginComponent implements OnInit {
         email: '',
         password: ''
     };
+    public logInError: string;
 
     private emailControl: FormControl;
     private passwordControl: FormControl;
@@ -71,23 +72,34 @@ export class LoginComponent implements OnInit {
         });
     };
 
-    logIn(): void {
+    private updateLogInError(msg: string): void {
+        this.zone.run(() => {
+            this.logInError = msg;
+        });
+    };
 
+    logIn(): void {
         this.validateForm();
 
         if(this.loginForm.invalid){
             return;
         }
 
-        this.authService.logIn().subscribe(() => {
-            // this.router.navigate(['/home']);
+        this.authService.logIn().subscribe((result: LogInResult) => {
+            switch (result){
+                case LogInResult.Success:
+                    this.router.navigate(['/koffi']);
+                    break;
+                case LogInResult.Failed:
+                    this.updateLogInError('There was a problem logging in');
+                    this.passwordControl.setValue('');
+                    break;
+            }
         });
-
-        //this.router.navigate(['/koffi']);
     };
 
     register(): void {
-        //this.router.navigate(['/register']);
+        this.router.navigate(['/register']);
     };
 }
 
