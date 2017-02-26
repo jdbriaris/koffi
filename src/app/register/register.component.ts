@@ -3,8 +3,7 @@ import {Router} from '@angular/router';
 import {NewUser} from "../domain/user.interface";
 import {FormGroup, FormBuilder, Validators, FormControl, AbstractControl} from "@angular/forms";
 import '../styles/forms.scss';
-import {AuthErrorCode, AuthError} from "../services/auth.error";
-import {AuthService, AUTH_SERVICE} from "../services/auth.service";
+import {AuthService, AUTH_SERVICE, CreateUserResult} from "../services/auth.service";
 
 @Component({
     moduleId: 'module.id',
@@ -88,30 +87,30 @@ export class RegisterComponent implements OnInit {
 
     register(newUser: NewUser): void {
         this.validateForm();
-
         if (this.registerForm.invalid) return;
-            // this.authService.createUser(newUser).subscribe(
-            //     ()=> {
-            //         console.log('success');
-            //     },
-            //     (error: AuthError) => {
-            //         switch (error.code){
-            //             case AuthErrorCode.EmailInUse:
-            //                 this.navigateTo('/sign-up-review');
-            //                 break;
-            //             case AuthErrorCode.InvalidEmail:
-            //                 this.updateFormError('email',   'Enter a valid email address');
-            //                 break;
-            //             case AuthErrorCode.InvalidPassword:
-            //                 this.updateFormError('password', 'Enter a stronger password');
-            //                 break;
-            //             default:
-            //                 //TODO: Work out where to navigate to here
-            //                 console.log(error.message);
-            //                 this.navigateTo('/login');
-            //                 break;
-            //         }
-            //     });
+
+        this.authService.createUser(newUser)
+            .subscribe((result: CreateUserResult) => {
+            switch (result){
+                case CreateUserResult.Success:
+                    this.router.navigate(['/home']);
+                    break;
+                case CreateUserResult.EmailAlreadyRegistered:
+                    this.router.navigate(['/register-review']);
+                    break;
+                case CreateUserResult.InvalidEmail:
+                    this.passwordControl.setValue('');
+                    this.updateFormError('email', 'Enter a valid email address');
+                    break;
+                case CreateUserResult.InvalidPassword:
+                    this.passwordControl.setValue('');
+                    this.updateFormError('password', 'Enter a valid password');
+                    break;
+                case CreateUserResult.Failed:
+                    this.router.navigate(['/error']);
+                    break;
+            }
+        });
     };
 
     private validateForm() {
@@ -119,7 +118,6 @@ export class RegisterComponent implements OnInit {
         for (const field in this.formErrors) {
             const control: AbstractControl = form.get(field);
             for (const key in control.errors) {
-                //TODO: Find more strongly-typed way of doing this
                 this.validationActions[field][key]();
             }
         }
@@ -133,7 +131,7 @@ export class RegisterComponent implements OnInit {
         this.router.navigate(([url]));
     }
 
-    signIn(): void {
+    logIn(): void {
         this.navigateTo('/login');
     };
 }

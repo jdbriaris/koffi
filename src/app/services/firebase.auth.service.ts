@@ -5,11 +5,10 @@ import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/delay';
 import {FirebaseService} from "./firebase.service";
 import {NewUser} from "../domain/user.interface";
-import {AuthService, LogInResult} from "./auth.service";
+import {AuthService, LogInResult, CreateUserResult} from "./auth.service";
 
 @Injectable()
 export class FirebaseAuthService implements AuthService {
-
     isLoggedIn: boolean = false;
 
     constructor(private firebaseService: FirebaseService) {}
@@ -22,7 +21,7 @@ export class FirebaseAuthService implements AuthService {
         this.isLoggedIn = false;
     };
 
-    // createUser(newUser: NewUser): Observable<NewUser> {
-    //     return this.firebaseService.createUser(newUser);
-    // };
+    createUser(newUser: NewUser): Observable<CreateUserResult> {
+        return Observable.of(CreateUserResult.InvalidEmail);
+    };
 }
