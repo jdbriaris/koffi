@@ -1,8 +1,11 @@
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
 import * as firebase from 'firebase';
+import 'rxjs/add/observable/of';
+import 'rxjs/add/operator/do';
+import 'rxjs/add/operator/delay';
 import {NewUser} from "../domain/user.interface";
-import {Observable} from "rxjs";
-import {AuthError, AuthErrorCode} from "./auth.error";
+import {AuthService, LogInResult, CreateUserResult} from "./auth.service";
 
 const config = {
     apiKey: "AIzaSyB5RBALHF5YGi_TK0M-hVyuQdkmHWACQH0",
@@ -12,57 +15,24 @@ const config = {
     messagingSenderId: "154364068514"
 };
 
-const authErrors = {
-    'auth/email-already-in-use': AuthErrorCode.EmailInUse,
-    'auth/invalid-email': AuthErrorCode.InvalidEmail,
-    'auth/weak-password': AuthErrorCode.InvalidPassword,
-    'auth/network-request-failed': AuthErrorCode.NetworkRequestFailure
-};
-
 @Injectable()
-export class FirebaseService {
+export class FirebaseService implements AuthService {
+    private app: firebase.app.App = null;
+    isLoggedIn: boolean = false;
 
-    app: firebase.app.App = null;
-
-    connect(): void {
-
-        console.log(config);
-
+    constructor() {
         this.app = firebase.initializeApp(config);
+    }
+
+    logIn(): Observable<LogInResult> {
+        return Observable.of(LogInResult.Failed).delay(1000).do(val => this.isLoggedIn = true);
     };
 
-    createUser(newUser: NewUser): Observable<NewUser> {
-        if (this.app == null) {
-            let code = AuthErrorCode.Unknown;
-            let msg = 'App not initialized';
-            return Observable.throw(new AuthError(code, msg));
-        }
-
-        return Observable.create(obs => {
-            firebase.auth()
-                .createUserWithEmailAndPassword(newUser.email, newUser.password)
-                .then((firebaseUser: firebase.User) => {
-                    //TODO: Update display name and pass back our user
-                    obs.next();
-                })
-                .catch((error: firebase.FirebaseError) => {
-                    let code = error.code in authErrors
-                        ? authErrors[error.code] : AuthErrorCode.Unknown;
-                    let msg = error.message;
-                    obs.error(new AuthError(code, msg));
-                });
-        });
+    logOut(): void {
+        this.isLoggedIn = false;
     };
 
-
-    //public signInWithEmailAndPassword()
-
-    // private updateDisplayName(displayName: string): Observable<void> {
-    //
-    //
-    //
-    //     return Observable.fromPromise(firebase.auth().)
-    //
-    // }
-
+    createUser(newUser: NewUser): Observable<CreateUserResult> {
+        return Observable.of(CreateUserResult.EmailAlreadyRegistered);
+    };
 }

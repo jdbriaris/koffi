@@ -1,5 +1,4 @@
 import {Component} from '@angular/core';
-import {FirebaseService} from "./services/firebase.service";
 import './styles/styles.scss';
 
 @Component({
@@ -7,9 +6,4 @@ import './styles/styles.scss';
     selector: 'xfit-app',
     templateUrl: './app.component.html'
 })
-export class AppComponent {
-
-    constructor(private firebaseService: FirebaseService) {
-        firebaseService.connect();
-    }
-}
+export class AppComponent {}
