@@ -6,7 +6,7 @@ import {FirebaseService} from "./services/firebase.service";
 import {LoginModule} from "./login/login.module";
 import {RegisterModule} from "./register/register.module";
 import {FirebaseAuthService} from "./services/firebase.auth.service";
-import {SignUpReviewModule} from "./sign-up-review/sign-up-review.module";
+import {RegisterReviewModule} from "./register-review/register-review.module";
 import {HomeModule} from "./home/home.module";
 import {AUTH_SERVICE} from "./services/auth.service";
 
@@ -15,7 +15,7 @@ import {AUTH_SERVICE} from "./services/auth.service";
         BrowserModule,
         LoginModule,
         RegisterModule,
-        SignUpReviewModule,
+        RegisterReviewModule,
         HomeModule,
         AppRoutingModule
     ],

@@ -22,6 +22,6 @@ export class FirebaseAuthService implements AuthService {
     };
 
     createUser(newUser: NewUser): Observable<CreateUserResult> {
-        return Observable.of(CreateUserResult.InvalidEmail);
+        return Observable.of(CreateUserResult.EmailAlreadyRegistered);
     };
 }

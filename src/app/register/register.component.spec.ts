@@ -233,8 +233,8 @@ describe('A RegisterComponent', () => {
 
             it('log in when user presses log in button', () => {
                 registerPage.userPressesLogIn();
-                //expect(routerSpy).toHaveBeenCalledTimes(1);
-                //expect(routerSpy).toHaveBeenCalledWith(['/login']);
+                expect(routerSpy).toHaveBeenCalledTimes(1);
+                expect(routerSpy).toHaveBeenCalledWith(['/login']);
             });
         });
     });
