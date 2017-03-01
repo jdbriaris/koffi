@@ -8,6 +8,8 @@ import {FirebaseService} from "./services/firebase.service";
 import {RegisterReviewModule} from "./register-review/register-review.module";
 import {HomeModule} from "./home/home.module";
 import {AUTH_SERVICE} from "./services/auth.service";
+import {FIREBASE_AUTH, firebaseAppFactory} from "./services/firebase.app.provider";
+
 
 @NgModule({
     imports: [
@@ -21,6 +23,7 @@ import {AUTH_SERVICE} from "./services/auth.service";
     declarations: [AppComponent],
     bootstrap: [AppComponent],
     providers: [
+        { provide: FIREBASE_AUTH, useFactory: firebaseAppFactory },
         { provide: AUTH_SERVICE, useClass: FirebaseService }
     ]
 })
