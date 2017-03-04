@@ -2,7 +2,7 @@ import {FirebaseAuthStub} from "../testing/firebase.app.stub";
 import Auth = firebase.auth.Auth;
 import {FirebaseService} from "./firebase.service";
 import Spy = jasmine.Spy;
-import {LogInResult, AuthService, LoginCredentials} from "./auth.service";
+import {LogInResult, AuthService, LoginCredentials, NewUser, CreateUserError} from "./auth.service";
 import {fakeAsync, tick} from "@angular/core/testing";
 
 describe('FirebaseService', () => {
@@ -29,7 +29,6 @@ describe('FirebaseService', () => {
 
         beforeEach(() => {
             spy = spyOn(firebaseAuth,  'signInWithEmailAndPassword');
-
         });
 
         it('calls signInWithEmailAndPassword on firebase', () => {
@@ -123,6 +122,65 @@ describe('FirebaseService', () => {
             tick();
             expect(firebaseService.isUserLoggedIn()).toBeFalsy();
         }));
+    });
+
+    describe('on createUser', () => {
+        let spy: Spy;
+        let newUser: NewUser;
+        let err: CreateUserError;
+
+        beforeEach(() => {
+            spy = spyOn(firebaseAuth,  'createUserWithEmailAndPassword');
+            newUser = {
+                name: 'name',
+                email: 'email',
+                password: 'password'
+            };
+        });
+
+        it('calls createUserWithEmailAndPassword on firebase', () => {
+            spy.and.returnValue(Promise.resolve({}));
+            firebaseService.createUser(newUser).subscribe();
+            expect(spy).toHaveBeenCalledTimes(1);
+            expect(spy).toHaveBeenCalledWith(newUser.email, newUser.password);
+        });
+
+        it('returns EmailAlreadyRegistered when firebase rejects with email-already-in-use', fakeAsync(() => {
+            err = CreateUserError.InvalidEmail;
+            spy.and.returnValue(Promise.reject('auth/email-already-in-use'));
+            firebaseService.createUser(newUser).subscribe(
+                () => {},
+                (res: CreateUserError) => {
+                    err = res;
+                });
+            tick();
+            expect(err).toEqual(CreateUserError.EmailAlreadyRegistered);
+        }));
+
+        it('returns InvalidEmail when firebase rejects with invalid-email', fakeAsync(() => {
+            err = CreateUserError.EmailAlreadyRegistered;
+            spy.and.returnValue(Promise.reject('auth/invalid-email'));
+            firebaseService.createUser(newUser).subscribe(
+                () => {},
+                (res: CreateUserError) => {
+                    err = res;
+                });
+            tick();
+            expect(err).toEqual(CreateUserError.InvalidEmail);
+        }));
+
+        it('returns WeakPassword when firebase rejects with weak-password', fakeAsync(() => {
+            err = CreateUserError.EmailAlreadyRegistered;
+            spy.and.returnValue(Promise.reject('auth/weak-password'));
+            firebaseService.createUser(newUser).subscribe(
+                () => {},
+                (res: CreateUserError) => {
+                    err = res;
+                });
+            tick();
+            expect(err).toEqual(CreateUserError.WeakPassword);
+        }));
+
     });
 
 });

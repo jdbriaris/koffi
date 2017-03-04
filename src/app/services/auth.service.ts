@@ -1,12 +1,23 @@
 import {Observable} from "rxjs/Observable";
 import {OpaqueToken} from "@angular/core";
-import {NewUser} from "../domain/user.interface";
 
 export let AUTH_SERVICE = new OpaqueToken('auth.service');
 
 export interface LoginCredentials {
     email: string,
     password: string
+}
+
+export interface User {
+    name: string;
+    email: string;
+    uid: string;
+}
+
+export interface NewUser {
+    name: string;
+    email: string;
+    password: string;
 }
 
 export enum LogInResult {
@@ -16,17 +27,16 @@ export enum LogInResult {
     'Failed'
 }
 
-export enum CreateUserResult {
-    'Success',
+export enum CreateUserError {
     'Failed',
     'EmailAlreadyRegistered',
     'InvalidEmail',
-    'InvalidPassword'
+    'WeakPassword'
 }
 
 export interface AuthService {
     logIn(credentials: LoginCredentials): Observable<LogInResult>;
     logOut(): void;
-    createUser(newUser: NewUser): Observable<CreateUserResult>;
+    createUser(newUser: NewUser): Observable<User>;
     isUserLoggedIn() : boolean;
 }

@@ -3,7 +3,7 @@ import {ComponentFixture, async, TestBed} from "@angular/core/testing";
 import {RegisterComponent} from "./register.component";
 import {By} from "@angular/platform-browser";
 import {ReactiveFormsModule} from "@angular/forms";
-import {AUTH_SERVICE, CreateUserResult} from "../services/auth.service";
+import {AUTH_SERVICE, CreateUserError, User, NewUser, LoginCredentials} from "../services/auth.service";
 import {AuthServiceStub} from "../testing/auth.service.stub";
 import {Router} from "@angular/router";
 import {RouterStub} from "../testing/router.stub";
@@ -124,21 +124,30 @@ describe('A RegisterComponent', () => {
         expect(passwordError.textContent).toBe('Password must be at least 6 characters long');
     });
 
-    describe('creates a user on AuthService', () => {
+    describe('calls createUser on AuthService', () => {
         let authService: AuthServiceStub;
-        let authServiceSpy: Spy;
-        let name = 'name';
-        let email = 'email';
-        let password = 'password';
-        let newUser = {
-            name: name,
-            email: email,
-            password: password
-        };
+        let createUserSpy: Spy;
+        let logInSpy: Spy;
+        const name = 'name';
+        const email = 'email';
+        const password = 'password';
+        let newUser: NewUser;
+        let user: User;
 
         beforeEach(() => {
             authService = fixture.debugElement.injector.get(AUTH_SERVICE);
-            authServiceSpy = spyOn(authService, 'createUser').and.callThrough();
+            createUserSpy = spyOn(authService, 'createUser').and.callThrough();
+            logInSpy = spyOn(authService, 'logIn');
+            newUser = {
+                name: name,
+                email: email,
+                password: password
+            };
+            user = {
+                name: name,
+                email: email,
+                uid: 'uid'
+            };
         });
 
         it('0 times if user has not set inputs and registers', () => {
@@ -147,7 +156,7 @@ describe('A RegisterComponent', () => {
                 .userEntersPassword('')
                 .userEntersName('')
                 .userPressesRegisterButton();
-            expect(authServiceSpy.calls.any()).toEqual(false);
+            expect(createUserSpy.calls.any()).toEqual(false);
         });
 
         it('1 time if user has set inputs and registers', () => {
@@ -156,36 +165,33 @@ describe('A RegisterComponent', () => {
                 .userEntersPassword(password)
                 .userEntersName(name)
                 .userPressesRegisterButton();
-
-            expect(authServiceSpy).toHaveBeenCalledTimes(1);
-            expect(authServiceSpy).toHaveBeenCalledWith(newUser);
+            expect(createUserSpy).toHaveBeenCalledTimes(1);
+            expect(createUserSpy).toHaveBeenCalledWith(newUser);
         });
 
         it('and shows error if user entered invalid email', () => {
-            authService.setCreateUserResult(CreateUserResult.InvalidEmail);
+            authService.setCreateUserError(CreateUserError.InvalidEmail);
             registerPage
                 .userEntersEmail(email)
                 .userEntersPassword(password)
                 .userEntersName(name)
                 .userPressesRegisterButton();
             fixture.detectChanges();
-
             let emailError = fixture.debugElement.query(By.css('#email-error')).nativeElement;
             expect(emailError.textContent).toBe('Enter a valid email address');
             expect(registerPage.passwordInput.value).toBe('');
         });
 
         it('and shows error if user entered invalid password', () => {
-            authService.setCreateUserResult(CreateUserResult.InvalidPassword);
+            authService.setCreateUserError(CreateUserError.WeakPassword);
             registerPage
                 .userEntersEmail(email)
                 .userEntersPassword(password)
                 .userEntersName(name)
                 .userPressesRegisterButton();
             fixture.detectChanges();
-
             let passwordError = fixture.debugElement.query(By.css('#password-error')).nativeElement;
-            expect(passwordError.textContent).toBe('Enter a valid password');
+            expect(passwordError.textContent).toBe('Enter a stronger password');
             expect(registerPage.passwordInput.value).toBe('');
         });
 
@@ -199,7 +205,7 @@ describe('A RegisterComponent', () => {
             });
 
             it('home when user successfully created', () => {
-                authService.setCreateUserResult(CreateUserResult.Success);
+                authService.setCreateUserResult(user);
                 registerPage
                     .userEntersEmail(email)
                     .userEntersPassword(password)
@@ -210,7 +216,7 @@ describe('A RegisterComponent', () => {
             });
 
             it('error when user creation failed', () => {
-                authService.setCreateUserResult(CreateUserResult.Failed);
+                authService.setCreateUserError(CreateUserError.Failed);
                 registerPage
                     .userEntersEmail(email)
                     .userEntersPassword(password)
@@ -221,7 +227,7 @@ describe('A RegisterComponent', () => {
             });
 
             it('register review when user successfully created', () => {
-                authService.setCreateUserResult(CreateUserResult.EmailAlreadyRegistered);
+                authService.setCreateUserError(CreateUserError.EmailAlreadyRegistered);
                 registerPage
                     .userEntersEmail(email)
                     .userEntersPassword(password)

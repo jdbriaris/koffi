@@ -4,16 +4,20 @@ import * as firebase from 'firebase';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/delay';
-import {NewUser} from "../domain/user.interface";
-import {AuthService, LogInResult, CreateUserResult, LoginCredentials} from "./auth.service";
+import {AuthService, LogInResult, LoginCredentials, NewUser, User, CreateUserError} from "./auth.service";
 import {FIREBASE_AUTH} from "./firebase.app.provider";
 import Auth = firebase.auth.Auth;
-import User = firebase.User;
 
-const firebaseAuthErrors = {
+const firebaseSignInErrors = {
     'auth/user-not-found': LogInResult.UserNotFound,
     'auth/invalid-email': LogInResult.UserNotFound,
     'auth/wrong-password': LogInResult.WrongPassword,
+};
+
+const firebaseCreateUserErrors = {
+    'auth/email-already-in-use': CreateUserError.EmailAlreadyRegistered,
+    'auth/invalid-email': CreateUserError.InvalidEmail,
+    'auth/weak-password': CreateUserError.WeakPassword,
 };
 
 @Injectable()
@@ -30,8 +34,8 @@ export class FirebaseService implements AuthService {
                     obs.next(LogInResult.Success);
                 })
                 .catch((err: any) => {
-                    if (err in firebaseAuthErrors) {
-                        obs.error(firebaseAuthErrors[err]);
+                    if (err in firebaseSignInErrors) {
+                        obs.error(firebaseSignInErrors[err]);
                     }
                     obs.error(LogInResult.Failed);
                 });
@@ -44,8 +48,19 @@ export class FirebaseService implements AuthService {
         });
     };
 
-    createUser(newUser: NewUser): Observable<CreateUserResult> {
-        return Observable.of(CreateUserResult.EmailAlreadyRegistered);
+    createUser(newUser: NewUser): Observable<User> {
+        return Observable.create(obs => {
+            this.firebaseApp.createUserWithEmailAndPassword(newUser.email, newUser.password)
+                .then(() => {
+
+                })
+                .catch((err: any) => {
+                    if (err in firebaseCreateUserErrors) {
+                        obs.error(firebaseCreateUserErrors[err]);
+                    }
+                    obs.error(CreateUserError.Failed);
+            });
+        });
     };
 
     isUserLoggedIn(): boolean {

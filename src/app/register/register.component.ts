@@ -1,9 +1,8 @@
 import {Component, OnInit, NgZone, Inject} from '@angular/core';
 import {Router} from '@angular/router';
-import {NewUser} from "../domain/user.interface";
 import {FormGroup, FormBuilder, Validators, FormControl, AbstractControl} from "@angular/forms";
 import '../styles/forms.scss';
-import {AuthService, AUTH_SERVICE, CreateUserResult} from "../services/auth.service";
+import {AuthService, AUTH_SERVICE, CreateUserError, NewUser, User, LoginCredentials} from "../services/auth.service";
 
 @Component({
     moduleId: 'module.id',
@@ -90,27 +89,28 @@ export class RegisterComponent implements OnInit {
         if (this.registerForm.invalid) return;
 
         this.authService.createUser(newUser)
-            .subscribe((result: CreateUserResult) => {
-            switch (result){
-                case CreateUserResult.Success:
+            .subscribe(
+                (user: User) => {
                     this.router.navigate(['/home']);
-                    break;
-                case CreateUserResult.EmailAlreadyRegistered:
-                    this.router.navigate(['/register-review']);
-                    break;
-                case CreateUserResult.InvalidEmail:
-                    this.passwordControl.setValue('');
-                    this.updateFormError('email', 'Enter a valid email address');
-                    break;
-                case CreateUserResult.InvalidPassword:
-                    this.passwordControl.setValue('');
-                    this.updateFormError('password', 'Enter a valid password');
-                    break;
-                case CreateUserResult.Failed:
-                    this.router.navigate(['/error']);
-                    break;
-            }
-        });
+                },
+                (err: CreateUserError) => {
+                    switch (err) {
+                        case CreateUserError.EmailAlreadyRegistered:
+                            this.router.navigate(['/register-review']);
+                            break;
+                        case CreateUserError.InvalidEmail:
+                            this.passwordControl.setValue('');
+                            this.updateFormError('email', 'Enter a valid email address');
+                            break;
+                        case CreateUserError.WeakPassword:
+                            this.passwordControl.setValue('');
+                            this.updateFormError('password', 'Enter a stronger password');
+                            break;
+                        case CreateUserError.Failed:
+                            this.router.navigate(['/error']);
+                            break;
+                    }
+                });
     };
 
     private validateForm() {
