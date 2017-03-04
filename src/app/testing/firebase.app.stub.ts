@@ -20,7 +20,7 @@ export class FirebaseAuthStub implements Auth {
     signInWithCredential(credential: firebase.auth.AuthCredential):
     firebase.Promise<any>{return null};
     signInWithCustomToken(token: string): firebase.Promise<any>{return null};
-    signInWithEmailAndPassword(email: string, password: string): firebase.Promise<any>{return null};
+    signInWithEmailAndPassword(email: string, password: string): firebase.Promise<any>{return null;};
     signInWithPopup(provider: firebase.auth.AuthProvider):
     firebase.Promise<any>{return null};
     signInWithRedirect(provider: firebase.auth.AuthProvider):

@@ -6,6 +6,7 @@ import {NewUser} from "../domain/user.interface";
 
 @Injectable()
 export class AuthServiceStub implements AuthService {
+
     private logInBehavior = new BehaviorSubject(LogInResult.Failed);
     private createUserBehavior = new BehaviorSubject(CreateUserResult.Failed);
     logInParams = this.logInBehavior.asObservable();
@@ -20,6 +21,10 @@ export class AuthServiceStub implements AuthService {
 
     createUser(newUser: NewUser): Observable<CreateUserResult> {
         return this.createUserParams;
+    }
+
+    isUserLoggedIn(): boolean {
+        return undefined;
     }
 
     setLogInResult(result: LogInResult){

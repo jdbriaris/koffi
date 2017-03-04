@@ -6,6 +6,8 @@ export let AUTH_SERVICE = new OpaqueToken('auth.service');
 
 export enum LogInResult {
     'Success',
+    'UserNotFound',
+    'WrongPassword',
     'Failed'
 }
 
@@ -21,4 +23,5 @@ export interface AuthService {
     logIn(): Observable<LogInResult>;
     logOut(): void;
     createUser(newUser: NewUser): Observable<CreateUserResult>;
+    isUserLoggedIn() : boolean;
 }

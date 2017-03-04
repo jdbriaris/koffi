@@ -8,24 +8,46 @@ import {NewUser} from "../domain/user.interface";
 import {AuthService, LogInResult, CreateUserResult} from "./auth.service";
 import {FIREBASE_AUTH} from "./firebase.app.provider";
 import Auth = firebase.auth.Auth;
+import User = firebase.User;
+
+const firebaseAuthErrors = {
+    'auth/user-not-found': LogInResult.UserNotFound,
+    'auth/invalid-email': LogInResult.UserNotFound,
+    'auth/wrong-password': LogInResult.WrongPassword,
+};
 
 @Injectable()
 export class FirebaseService implements AuthService {
-    isLoggedIn: boolean = false;
+    private userLoggedIn = false;
 
     constructor(@Inject(FIREBASE_AUTH) private firebaseApp: Auth) {}
 
     logIn(): Observable<LogInResult> {
-        this.firebaseApp.signInWithEmailAndPassword("","");
-
-        return Observable.of(LogInResult.Failed).delay(1000).do(val => this.isLoggedIn = true);
+        return Observable.create(obs => {
+            this.firebaseApp.signInWithEmailAndPassword("","").then(() => {
+                this.userLoggedIn = true;
+                console.log("JAMES");
+                obs.next(LogInResult.Success);
+            }).catch((err: any) => {
+                if (err in firebaseAuthErrors) {
+                    obs.error(firebaseAuthErrors[err]);
+                }
+                obs.error(LogInResult.Failed);
+            });
+        });
     };
 
     logOut(): void {
-        this.isLoggedIn = false;
+        this.firebaseApp.signOut().then(() => {
+            this.userLoggedIn = false;
+        });
     };
 
     createUser(newUser: NewUser): Observable<CreateUserResult> {
         return Observable.of(CreateUserResult.EmailAlreadyRegistered);
     };
+
+    isUserLoggedIn(): boolean {
+        return this.userLoggedIn;
+    }
 }
