@@ -4,6 +4,11 @@ import {NewUser} from "../domain/user.interface";
 
 export let AUTH_SERVICE = new OpaqueToken('auth.service');
 
+export interface LoginCredentials {
+    email: string,
+    password: string
+}
+
 export enum LogInResult {
     'Success',
     'UserNotFound',
@@ -20,7 +25,7 @@ export enum CreateUserResult {
 }
 
 export interface AuthService {
-    logIn(): Observable<LogInResult>;
+    logIn(credentials: LoginCredentials): Observable<LogInResult>;
     logOut(): void;
     createUser(newUser: NewUser): Observable<CreateUserResult>;
     isUserLoggedIn() : boolean;

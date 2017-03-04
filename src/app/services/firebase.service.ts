@@ -5,7 +5,7 @@ import 'rxjs/add/observable/of';
 import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/delay';
 import {NewUser} from "../domain/user.interface";
-import {AuthService, LogInResult, CreateUserResult} from "./auth.service";
+import {AuthService, LogInResult, CreateUserResult, LoginCredentials} from "./auth.service";
 import {FIREBASE_AUTH} from "./firebase.app.provider";
 import Auth = firebase.auth.Auth;
 import User = firebase.User;
@@ -22,18 +22,19 @@ export class FirebaseService implements AuthService {
 
     constructor(@Inject(FIREBASE_AUTH) private firebaseApp: Auth) {}
 
-    logIn(): Observable<LogInResult> {
+    logIn(credentials: LoginCredentials): Observable<LogInResult> {
         return Observable.create(obs => {
-            this.firebaseApp.signInWithEmailAndPassword("","").then(() => {
-                this.userLoggedIn = true;
-                console.log("JAMES");
-                obs.next(LogInResult.Success);
-            }).catch((err: any) => {
-                if (err in firebaseAuthErrors) {
-                    obs.error(firebaseAuthErrors[err]);
-                }
-                obs.error(LogInResult.Failed);
-            });
+            this.firebaseApp.signInWithEmailAndPassword(credentials.email, credentials.password)
+                .then(() => {
+                    this.userLoggedIn = true;
+                    obs.next(LogInResult.Success);
+                })
+                .catch((err: any) => {
+                    if (err in firebaseAuthErrors) {
+                        obs.error(firebaseAuthErrors[err]);
+                    }
+                    obs.error(LogInResult.Failed);
+                });
         });
     };
 

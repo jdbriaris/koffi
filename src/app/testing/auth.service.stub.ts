@@ -1,18 +1,17 @@
 import {Injectable} from "@angular/core";
-import {AuthService, LogInResult, CreateUserResult} from "../services/auth.service";
+import {AuthService, LogInResult, CreateUserResult, LoginCredentials} from "../services/auth.service";
 import {Observable} from "rxjs/Observable";
 import {BehaviorSubject} from "rxjs/BehaviorSubject";
 import {NewUser} from "../domain/user.interface";
 
 @Injectable()
 export class AuthServiceStub implements AuthService {
-
     private logInBehavior = new BehaviorSubject(LogInResult.Failed);
     private createUserBehavior = new BehaviorSubject(CreateUserResult.Failed);
     logInParams = this.logInBehavior.asObservable();
     createUserParams = this.createUserBehavior.asObservable();
 
-    logIn(): Observable<LogInResult> {
+    logIn(credentials: LoginCredentials): Observable<LogInResult> {
         return this.logInParams;
     }
 

@@ -2,12 +2,7 @@ import {Component, OnInit, NgZone, Inject} from '@angular/core';
 import {Router} from '@angular/router';
 import {FormGroup, FormBuilder, FormControl, Validators, AbstractControl} from "@angular/forms";
 import '../styles/forms.scss';
-import {AuthService, AUTH_SERVICE, LogInResult} from "../services/auth.service";
-
-interface LoginCredentials {
-    email: string,
-    password: string
-}
+import {AuthService, AUTH_SERVICE, LogInResult, LoginCredentials} from "../services/auth.service";
 
 @Component({
     moduleId: 'module.id',
@@ -85,7 +80,13 @@ export class LoginComponent implements OnInit {
             return;
         }
 
-        this.authService.logIn().subscribe((result: LogInResult) => {
+        let credentials: LoginCredentials;
+        credentials = {
+            email: this.emailControl.value,
+            password: this.passwordControl.value
+        };
+
+        this.authService.logIn(credentials).subscribe((result: LogInResult) => {
             switch (result){
                 case LogInResult.Success:
                     this.router.navigate(['/home']);
