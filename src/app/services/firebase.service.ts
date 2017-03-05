@@ -7,6 +7,7 @@ import 'rxjs/add/operator/delay';
 import {AuthService, LogInResult, LoginCredentials, NewUser, User, CreateUserError} from "./auth.service";
 import {FIREBASE_AUTH} from "./firebase.app.provider";
 import Auth = firebase.auth.Auth;
+import FirebaseUser = firebase.User;
 
 const firebaseSignInErrors = {
     'auth/user-not-found': LogInResult.UserNotFound,
@@ -51,8 +52,15 @@ export class FirebaseService implements AuthService {
     createUser(newUser: NewUser): Observable<User> {
         return Observable.create(obs => {
             this.firebaseApp.createUserWithEmailAndPassword(newUser.email, newUser.password)
-                .then(() => {
-
+                .then((res: FirebaseUser) => {
+                    let user: User;
+                    user = {
+                        name: res.displayName,
+                        email: res.email,
+                        uid: res.uid
+                    };
+                    this.userLoggedIn = true;
+                    obs.next(user);
                 })
                 .catch((err: any) => {
                     if (err in firebaseCreateUserErrors) {

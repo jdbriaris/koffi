@@ -90,7 +90,7 @@ export class RegisterComponent implements OnInit {
 
         this.authService.createUser(newUser)
             .subscribe(
-                (user: User) => {
+                () => {
                     this.router.navigate(['/home']);
                 },
                 (err: CreateUserError) => {

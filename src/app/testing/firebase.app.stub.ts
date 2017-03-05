@@ -1,7 +1,6 @@
 import App = firebase.app.App;
 import Auth = firebase.auth.Auth;
 
-
 export class FirebaseAuthStub implements Auth {
     app: firebase.app.App;
     applyActionCode(code: string): firebase.Promise<any>{return null};

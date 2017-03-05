@@ -2,10 +2,15 @@ import {FirebaseAuthStub} from "../testing/firebase.app.stub";
 import Auth = firebase.auth.Auth;
 import {FirebaseService} from "./firebase.service";
 import Spy = jasmine.Spy;
-import {LogInResult, AuthService, LoginCredentials, NewUser, CreateUserError} from "./auth.service";
+import {LogInResult, AuthService, LoginCredentials, NewUser, CreateUserError, User} from "./auth.service";
 import {fakeAsync, tick} from "@angular/core/testing";
+import FirebaseUser = firebase.User;
+import {FirebaseUserStub} from "../testing/firebase.user.stub";
 
 describe('FirebaseService', () => {
+    const email = 'someone@somewhere.com';
+    const name = 'someone';
+    const password = 'password';
     let firebaseAuth: Auth;
     let firebaseService: AuthService;
     let credentials: LoginCredentials;
@@ -14,8 +19,8 @@ describe('FirebaseService', () => {
         firebaseAuth = new FirebaseAuthStub();
         firebaseService = new FirebaseService(firebaseAuth);
         credentials = {
-            email: 'someone@somewhere.com',
-            password: 'password'
+            email: email,
+            password: password
         };
     });
 
@@ -128,13 +133,14 @@ describe('FirebaseService', () => {
         let spy: Spy;
         let newUser: NewUser;
         let err: CreateUserError;
+        let user: User;
 
         beforeEach(() => {
             spy = spyOn(firebaseAuth,  'createUserWithEmailAndPassword');
             newUser = {
-                name: 'name',
-                email: 'email',
-                password: 'password'
+                name: name,
+                email: email,
+                password: password
             };
         });
 
@@ -143,6 +149,44 @@ describe('FirebaseService', () => {
             firebaseService.createUser(newUser).subscribe();
             expect(spy).toHaveBeenCalledTimes(1);
             expect(spy).toHaveBeenCalledWith(newUser.email, newUser.password);
+        });
+
+        describe('and firebase resolves with firebase user', () => {
+            const uid = 'uid';
+            let firebaseUser: FirebaseUser;
+
+            beforeEach(() => {
+                firebaseUser = new FirebaseUserStub();
+                firebaseUser.displayName = name;
+                firebaseUser.email = email;
+                firebaseUser.uid = uid;
+            });
+
+            it('return user when firebase resolves with firebase user', fakeAsync(() => {
+                user = null;
+                let expectedUser: User;
+                expectedUser = {
+                    name: name,
+                    email: email,
+                    uid: uid
+                };
+                spy.and.returnValue(Promise.resolve(firebaseUser));
+                firebaseService.createUser(newUser).subscribe(
+                    (u: User) => {
+                        user = u;
+                    });
+                tick();
+                expect(user).toEqual(expectedUser);
+            }));
+
+            it('sets isUserLoggedIn to true when firebase resolves with firebase user', fakeAsync(() => {
+                expect(firebaseService.isUserLoggedIn()).toBeFalsy();
+                spy.and.returnValue(Promise.resolve(firebaseUser));
+                firebaseService.createUser(newUser).subscribe();
+                tick();
+                expect(firebaseService.isUserLoggedIn()).toBeTruthy();
+            }));
+
         });
 
         it('returns EmailAlreadyRegistered when firebase rejects with email-already-in-use', fakeAsync(() => {
@@ -179,6 +223,18 @@ describe('FirebaseService', () => {
                 });
             tick();
             expect(err).toEqual(CreateUserError.WeakPassword);
+        }));
+
+        it('returns Failed when firebase rejects with unknown error', fakeAsync(() => {
+            err = CreateUserError.InvalidEmail;
+            spy.and.returnValue(Promise.reject('some unknown string'));
+            firebaseService.createUser(newUser).subscribe(
+                () => {},
+                (res: CreateUserError) => {
+                    err = res;
+                });
+            tick();
+            expect(err).toEqual(CreateUserError.Failed);
         }));
 
     });
