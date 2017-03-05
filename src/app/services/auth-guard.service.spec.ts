@@ -1,4 +1,4 @@
-import {TestBed, inject, async} from "@angular/core/testing";
+import {TestBed, async} from "@angular/core/testing";
 import {RouterStub} from "../testing/router.stub";
 import {Router} from "@angular/router";
 import {AuthServiceStub} from "../testing/auth.service.stub";
@@ -12,7 +12,7 @@ describe('AuthGuard', () => {
     let authGuard: AuthGuard;
     let authServiceSpy: Spy;
 
-    beforeEach(async(() => {
+    beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [
                 {provide: AUTH_SERVICE, useClass: AuthServiceStub},
@@ -23,7 +23,7 @@ describe('AuthGuard', () => {
         authService = TestBed.get(AUTH_SERVICE);
         authGuard = new AuthGuard(authService, router);
         authServiceSpy = spyOn(authService, 'isUserLoggedIn');
-    }));
+    });
 
     it('on canActivate returns false if user not logged in', () => {
         authServiceSpy.and.returnValue(false);
