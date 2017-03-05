@@ -2,7 +2,7 @@ import {Component, OnInit, NgZone, Inject} from '@angular/core';
 import {Router} from '@angular/router';
 import {FormGroup, FormBuilder, Validators, FormControl, AbstractControl} from "@angular/forms";
 import '../styles/forms.scss';
-import {AuthService, AUTH_SERVICE, CreateUserError, NewUser, User, LoginCredentials} from "../services/auth.service";
+import {AuthService, AUTH_SERVICE, CreateUserError, NewUser} from "../services/auth.service";
 
 @Component({
     moduleId: 'module.id',
