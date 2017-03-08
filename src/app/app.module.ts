@@ -9,6 +9,7 @@ import {RegisterReviewModule} from "./register-review/register-review.module";
 import {HomeModule} from "./home/home.module";
 import {AUTH_SERVICE} from "./services/auth.service";
 import {FIREBASE_AUTH, firebaseAppFactory} from "./services/firebase.app.provider";
+import {ForgotPasswordModule} from "./forgot-password/forgot-password.module";
 
 
 @NgModule({
@@ -17,6 +18,7 @@ import {FIREBASE_AUTH, firebaseAppFactory} from "./services/firebase.app.provide
         LoginModule,
         RegisterModule,
         RegisterReviewModule,
+        ForgotPasswordModule,
         HomeModule,
         AppRoutingModule
     ],

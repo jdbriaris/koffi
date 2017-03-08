@@ -13,6 +13,7 @@ class LoginPage {
     loginForm: DebugElement;
     loginButton: DebugElement;
     registerButton: DebugElement;
+    forgotPasswordButton: DebugElement;
     emailInput: HTMLInputElement;
     passwordInput: HTMLInputElement;
 
@@ -24,6 +25,7 @@ class LoginPage {
         this.loginForm = fixture.debugElement.query(By.css('.form-container'));
         this.loginButton = fixture.debugElement.query(By.css('#login-button'));
         this.registerButton = fixture.debugElement.query(By.css('#register-button'));
+        this.forgotPasswordButton = fixture.debugElement.query(By.css('#forgot-password-button'));
         this.emailInput = fixture.debugElement.query(By.css('#email')).nativeElement;
         this.passwordInput = fixture.debugElement.query(By.css('#password')).nativeElement;
     }
@@ -47,6 +49,11 @@ class LoginPage {
 
     userPressesRegisterButton(): LoginPage {
         this.registerButton.triggerEventHandler('click', null);
+        return this;
+    }
+
+    userPressesForgotPasswordButton(): LoginPage {
+        this.forgotPasswordButton.triggerEventHandler('click', null);
         return this;
     }
 }
@@ -84,6 +91,14 @@ describe('A LoginComponent', () => {
 
     it('should have a button displaying "Log in"', () => {
         expect(loginPage.loginButton.nativeElement.textContent).toContain('Log in');
+    });
+
+    it('should have a button displaying "Forgot password"', () => {
+        expect(loginPage.forgotPasswordButton.nativeElement.textContent).toContain('Forgot my password');
+    });
+
+    it('should have a button displaying "Create your koffi account"', () => {
+        expect(loginPage.registerButton.nativeElement.textContent).toContain('Create your koffi account');
     });
 
     it('should display an error when email not set and user attempts to login', () => {
@@ -171,6 +186,12 @@ describe('A LoginComponent', () => {
                 loginPage.userPressesRegisterButton();
                 expect(routerSpy).toHaveBeenCalledTimes(1);
                 expect(routerSpy).toHaveBeenCalledWith(['/register']);
+            });
+
+            it('forgot password when user has clicked forgot password', () => {
+                loginPage.userPressesForgotPasswordButton();
+                expect(routerSpy).toHaveBeenCalledTimes(1);
+                expect(routerSpy).toHaveBeenCalledWith(['/forgot-password']);
             });
         });
     });
