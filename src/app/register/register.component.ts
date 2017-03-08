@@ -96,7 +96,7 @@ export class RegisterComponent implements OnInit {
                 (err: CreateUserError) => {
                     switch (err) {
                         case CreateUserError.EmailAlreadyRegistered:
-                            this.router.navigate(['/register-review']);
+                            this.router.navigate(['/register-review', this.emailControl.value]);
                             break;
                         case CreateUserError.InvalidEmail:
                             this.passwordControl.setValue('');

@@ -1,4 +1,4 @@
-import {FirebaseAuthStub} from "../testing/firebase.app.stub";
+import {FirebaseAuthStub} from "../testing/firebase.auth.stub";
 import Auth = firebase.auth.Auth;
 import {FirebaseService} from "./firebase.service";
 import Spy = jasmine.Spy;

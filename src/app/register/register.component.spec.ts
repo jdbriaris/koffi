@@ -3,7 +3,7 @@ import {ComponentFixture, async, TestBed} from "@angular/core/testing";
 import {RegisterComponent} from "./register.component";
 import {By} from "@angular/platform-browser";
 import {ReactiveFormsModule} from "@angular/forms";
-import {AUTH_SERVICE, CreateUserError, User, NewUser, LoginCredentials} from "../services/auth.service";
+import {AUTH_SERVICE, CreateUserError, User, NewUser} from "../services/auth.service";
 import {AuthServiceStub} from "../testing/auth.service.stub";
 import {Router} from "@angular/router";
 import {RouterStub} from "../testing/router.stub";
@@ -234,7 +234,7 @@ describe('A RegisterComponent', () => {
                     .userEntersName(name)
                     .userPressesRegisterButton();
                 expect(routerSpy).toHaveBeenCalledTimes(1);
-                expect(routerSpy).toHaveBeenCalledWith(['/register-review']);
+                expect(routerSpy).toHaveBeenCalledWith(['/register-review', email]);
             });
 
             it('log in when user presses log in button', () => {
