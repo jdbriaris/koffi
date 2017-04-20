@@ -20,8 +20,7 @@ export interface NewUser {
     password: string;
 }
 
-export enum LogInResult {
-    'Success',
+export enum LogInError {
     'UserNotFound',
     'WrongPassword',
     'Failed'
@@ -34,9 +33,16 @@ export enum CreateUserError {
     'WeakPassword'
 }
 
+export enum ResetPasswordError {
+    'InavlidEmail',
+    'UserNotFound',
+    'Failed'
+}
+
 export interface AuthService {
-    logIn(credentials: LoginCredentials): Observable<LogInResult>;
+    logIn(credentials: LoginCredentials): Observable<User>;
     logOut(): void;
     createUser(newUser: NewUser): Observable<User>;
     isUserLoggedIn() : boolean;
+    resetPassword(email: string): Observable<void>;
 }

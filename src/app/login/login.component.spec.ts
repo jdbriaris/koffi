@@ -4,7 +4,7 @@ import {DebugElement} from "@angular/core";
 import {By} from "@angular/platform-browser";
 import {ReactiveFormsModule} from "@angular/forms";
 import {Router} from "@angular/router";
-import {AUTH_SERVICE, LogInResult} from "../services/auth.service";
+import {AUTH_SERVICE, LogInError, User} from "../services/auth.service";
 import Spy = jasmine.Spy;
 import {RouterStub} from "../testing/router.stub";
 import {AuthServiceStub} from "../testing/auth.service.stub";
@@ -123,12 +123,21 @@ describe('A LoginComponent', () => {
     });
 
     describe('calls logIn on AuthService', () => {
+        const name = 'name';
+        const email = 'email';
+        const password = 'password';
         let authService: AuthServiceStub;
         let authServiceSpy: Spy;
+        let user: User;
 
         beforeEach(() => {
             authService = fixture.debugElement.injector.get(AUTH_SERVICE);
             authServiceSpy = spyOn(authService, 'logIn').and.callThrough();
+            user = {
+                name: name,
+                email: email,
+                uid: 'uid'
+            };
         });
 
         it('0 times if user has not entered email', () => {
@@ -151,8 +160,16 @@ describe('A LoginComponent', () => {
             expect(authServiceSpy).toHaveBeenCalledTimes(1);
         });
 
-        it('and shows log in error if log in failed', () => {
-            authService.setLogInResult(LogInResult.Failed);
+        it('and shows log in problem error if log in failed', () => {
+            authService.setLogInError(LogInError.Failed);
+            loginPage.userEntersEmail('email').userEntersPassword('password').userPressesLogIn();
+            fixture.detectChanges();
+            let passwordError = fixture.debugElement.query(By.css('#login-error')).nativeElement;
+            expect(passwordError.textContent).toBe('There was a problem logging in');
+        });
+
+        it('and shows log in problem error if log in failed', () => {
+            authService.setLogInError(LogInError.Failed);
             loginPage.userEntersEmail('email').userEntersPassword('password').userPressesLogIn();
             fixture.detectChanges();
             let passwordError = fixture.debugElement.query(By.css('#login-error')).nativeElement;
@@ -160,7 +177,7 @@ describe('A LoginComponent', () => {
         });
 
         it('and removes entered password if log in failed', () => {
-            authService.setLogInResult(LogInResult.Failed);
+            authService.setLogInError(LogInError.Failed);
             loginPage.userEntersEmail('email').userEntersPassword('password').userPressesLogIn();
             fixture.detectChanges();
             expect(loginPage.passwordInput.value).toBe('');
@@ -176,7 +193,7 @@ describe('A LoginComponent', () => {
             });
 
             it('home when log in successful', () => {
-                authService.setLogInResult(LogInResult.Success);
+                authService.setLogInResult(user);
                 loginPage.userEntersEmail('email').userEntersPassword('password').userPressesLogIn();
                 expect(routerSpy).toHaveBeenCalledTimes(1);
                 expect(routerSpy).toHaveBeenCalledWith(['/home']);

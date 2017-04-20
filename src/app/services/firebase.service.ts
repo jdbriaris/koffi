@@ -4,15 +4,19 @@ import * as firebase from 'firebase';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/delay';
-import {AuthService, LogInResult, LoginCredentials, NewUser, User, CreateUserError} from "./auth.service";
+import {
+    AuthService, LogInError, LoginCredentials, NewUser, User, CreateUserError,
+    ResetPasswordError
+} from "./auth.service";
 import {FIREBASE_AUTH} from "./firebase.app.provider";
 import Auth = firebase.auth.Auth;
 import FirebaseUser = firebase.User;
+import Error = firebase.auth.Error;
 
 const firebaseSignInErrors = {
-    'auth/user-not-found': LogInResult.UserNotFound,
-    'auth/invalid-email': LogInResult.UserNotFound,
-    'auth/wrong-password': LogInResult.WrongPassword,
+    'auth/user-not-found': LogInError.UserNotFound,
+    'auth/invalid-email': LogInError.UserNotFound,
+    'auth/wrong-password': LogInError.WrongPassword,
 };
 
 const firebaseCreateUserErrors = {
@@ -21,24 +25,32 @@ const firebaseCreateUserErrors = {
     'auth/weak-password': CreateUserError.WeakPassword,
 };
 
+const firebaseSendResetPasswordEmailErrors = {
+    'auth/invalid-email': ResetPasswordError.InavlidEmail,
+    'auth/user-not-found': ResetPasswordError.UserNotFound
+};
+
 @Injectable()
 export class FirebaseService implements AuthService {
+
     private userLoggedIn = false;
 
     constructor(@Inject(FIREBASE_AUTH) private firebaseApp: Auth) {}
 
-    logIn(credentials: LoginCredentials): Observable<LogInResult> {
+    logIn(credentials: LoginCredentials): Observable<User> {
         return Observable.create(obs => {
             this.firebaseApp.signInWithEmailAndPassword(credentials.email, credentials.password)
-                .then(() => {
+                .then((res: any) => {
+                    let user = this.makeUserFromFbUser(res as firebase.User);
                     this.userLoggedIn = true;
-                    obs.next(LogInResult.Success);
+                    obs.next(user);
                 })
                 .catch((err: any) => {
-                    if (err in firebaseSignInErrors) {
-                        obs.error(firebaseSignInErrors[err]);
+                    let fbError = err as firebase.auth.Error;
+                    if (fbError.code in firebaseSignInErrors) {
+                        obs.error(firebaseSignInErrors[fbError.code]);
                     }
-                    obs.error(LogInResult.Failed);
+                    obs.error(LogInError.Failed);
                 });
         });
     };
@@ -63,8 +75,9 @@ export class FirebaseService implements AuthService {
                     obs.next(user);
                 })
                 .catch((err: any) => {
-                    if (err in firebaseCreateUserErrors) {
-                        obs.error(firebaseCreateUserErrors[err]);
+                    let fbError = err as firebase.auth.Error;
+                    if (fbError.code in firebaseCreateUserErrors) {
+                        obs.error(firebaseCreateUserErrors[fbError.code]);
                     }
                     obs.error(CreateUserError.Failed);
             });
@@ -73,5 +86,31 @@ export class FirebaseService implements AuthService {
 
     isUserLoggedIn(): boolean {
         return this.userLoggedIn;
+    }
+
+    resetPassword(email: string): Observable<void> {
+        return Observable.create(obs => {
+            this.firebaseApp.sendPasswordResetEmail(email)
+                .then(() => {
+                    obs.next();
+                    })
+                .catch((err: any) => {
+                    let fbError = err as firebase.auth.Error;
+                    if (fbError.code in firebaseSendResetPasswordEmailErrors) {
+                        obs.error(firebaseSendResetPasswordEmailErrors[fbError.code]);
+                    }
+                    obs.error(ResetPasswordError.Failed);
+                });
+        });
+    };
+
+    private makeUserFromFbUser(fbUser: firebase.User) {
+        let user: User;
+        user = {
+            email: fbUser.email,
+            name: fbUser.displayName,
+            uid: fbUser.uid
+        };
+        return user;
     }
 }
