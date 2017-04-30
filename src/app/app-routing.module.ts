@@ -6,7 +6,6 @@ import {RegisterReviewComponent} from "./register-review/register-review.compone
 import {ForgotPasswordComponent} from "./forgot-password/forgot-password.component";
 
 const routes: Routes = [
-    {path: '', redirectTo: '/login', pathMatch: 'full'},
     {path: 'login', component: LoginComponent},
     {path: 'register', component: RegisterComponent},
     {path: 'register-review/:email', component: RegisterReviewComponent},

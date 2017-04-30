@@ -1,14 +1,7 @@
-import {Component} from '@angular/core';
-import * as firebase from 'firebase';
+import {Component, Inject} from '@angular/core';
 import './styles/styles.scss';
-
-const config = {
-    apiKey: "AIzaSyB5RBALHF5YGi_TK0M-hVyuQdkmHWACQH0",
-    authDomain: "koffi-bd880.firebaseapp.com",
-    databaseURL: "https://koffi-bd880.firebaseio.com",
-    storageBucket: "koffi-bd880.appspot.com",
-    messagingSenderId: "154364068514"
-};
+import {AUTH_SERVICE, AuthService, User} from "./services/auth.service";
+import {Router} from "@angular/router";
 
 @Component({
     moduleId: 'module.id',
@@ -16,7 +9,17 @@ const config = {
     templateUrl: './app.component.html'
 })
 export class AppComponent {
-    constructor(){
-        firebase.initializeApp(config);
+    constructor(
+        private router: Router,
+        @Inject(AUTH_SERVICE) private authService: AuthService
+    ){
+        authService.onUserLogInStateChanged().subscribe((user: User) => {
+            if (user) {
+                this.router.navigate(['/home']);
+            }
+            else {
+                this.router.navigate(['/login']);
+            }
+        })
     }
 }

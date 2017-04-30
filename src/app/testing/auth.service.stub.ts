@@ -8,29 +8,40 @@ import {BehaviorSubject} from "rxjs/BehaviorSubject";
 
 @Injectable()
 export class AuthServiceStub implements AuthService {
-    private logInBehavior;
-    private createUserBehavior;
+    private logInBehavior: BehaviorSubject<User>;
+    private createUserBehavior: BehaviorSubject<User>;
     private resetPasswordBehavior;
+    private userLogInStateChangedBehavior: BehaviorSubject<User>;
     logInParams: Observable<User>;
     createUserParams: Observable<User>;
     resetPasswordParams: Observable<void>;
+    userLogInStateChangedObs: Observable<User>;
 
     constructor(){
         let user: User;
         user = {name: "name",  email: "password", uid: "uid"};
+
         this.logInBehavior = new BehaviorSubject(user);
         this.createUserBehavior = new BehaviorSubject(user);
+        this.userLogInStateChangedBehavior = new BehaviorSubject(user);
         this.resetPasswordBehavior = new BehaviorSubject(ResetPasswordError.InavlidEmail);
+
         this.logInParams = this.logInBehavior.asObservable();
         this.createUserParams = this.createUserBehavior.asObservable();
         this.resetPasswordParams = this.resetPasswordBehavior.asObservable();
+        this.userLogInStateChangedObs = this.userLogInStateChangedBehavior.asObservable();
     }
 
     logIn(credentials: LoginCredentials): Observable<User> {
         return this.logInParams;
     }
 
-    logOut(): void {
+    logOut(): Observable<void> {
+        return undefined;
+    }
+
+    onUserLogInStateChanged(): Observable<User> {
+        return this.userLogInStateChangedObs;
     }
 
     resetPassword(email: string): Observable<void> {
@@ -63,5 +74,9 @@ export class AuthServiceStub implements AuthService {
 
     setResetPasswordError(err: ResetPasswordError) {
         this.resetPasswordBehavior.error(err);
+    }
+
+    setUserLogInStateChangedResult(user: User) {
+        this.userLogInStateChangedBehavior.next(user);
     }
 }

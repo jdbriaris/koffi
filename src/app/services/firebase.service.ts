@@ -12,6 +12,7 @@ import {FIREBASE_AUTH} from "./firebase.app.provider";
 import Auth = firebase.auth.Auth;
 import FirebaseUser = firebase.User;
 import Error = firebase.auth.Error;
+import {Subject} from "rxjs/Subject";
 
 const firebaseSignInErrors = {
     'auth/user-not-found': LogInError.UserNotFound,
@@ -32,17 +33,44 @@ const firebaseSendResetPasswordEmailErrors = {
 
 @Injectable()
 export class FirebaseService implements AuthService {
-
+    private userLogInStateSubject: Subject<User>;
     private userLoggedIn = false;
 
-    constructor(@Inject(FIREBASE_AUTH) private firebaseApp: Auth) {}
+    constructor(@Inject(FIREBASE_AUTH) private firebaseApp: Auth) {
+        this.userLogInStateSubject = new Subject();
+
+        firebaseApp.onAuthStateChanged(
+            (fbUser: FirebaseUser) =>
+                this.onFirebaseAuthStateChanged(fbUser, this.userLogInStateSubject),
+            (fbError: Error) =>
+                this.userLogInStateSubject.error(fbError.message),
+            () => {
+                this.userLogInStateSubject.complete()
+            }
+        );
+    }
+
+    private onFirebaseAuthStateChanged(fbUser: FirebaseUser, subject: Subject<User>): void {
+        if (fbUser) {
+            let user = this.makeUserFromFbUser(fbUser);
+            this.userLoggedIn = true;
+            subject.next(user);
+        }
+        else {
+            this.userLoggedIn = false;
+            subject.next(null);
+        }
+    }
+
+    onUserLogInStateChanged(): Subject<User> {
+        return this.userLogInStateSubject;
+    }
 
     logIn(credentials: LoginCredentials): Observable<User> {
         return Observable.create(obs => {
             this.firebaseApp.signInWithEmailAndPassword(credentials.email, credentials.password)
                 .then((res: any) => {
                     let user = this.makeUserFromFbUser(res as firebase.User);
-                    this.userLoggedIn = true;
                     obs.next(user);
                 })
                 .catch((err: any) => {
@@ -55,9 +83,11 @@ export class FirebaseService implements AuthService {
         });
     };
 
-    logOut(): void {
-        this.firebaseApp.signOut().then(() => {
-            this.userLoggedIn = false;
+    logOut(): Observable<void> {
+        return Observable.create(obs => {
+            this.firebaseApp.signOut().then(() => {
+                obs.next();
+            });
         });
     };
 

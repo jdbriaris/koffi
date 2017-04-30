@@ -41,8 +41,9 @@ export enum ResetPasswordError {
 
 export interface AuthService {
     logIn(credentials: LoginCredentials): Observable<User>;
-    logOut(): void;
+    logOut(): Observable<void>;
     createUser(newUser: NewUser): Observable<User>;
     isUserLoggedIn() : boolean;
     resetPassword(email: string): Observable<void>;
+    onUserLogInStateChanged(): Observable<User>;
 }

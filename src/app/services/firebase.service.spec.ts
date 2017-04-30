@@ -9,12 +9,13 @@ import {
 import {fakeAsync, tick} from "@angular/core/testing";
 import FirebaseUser = firebase.User;
 import {FirebaseUserStub} from "../testing/firebase.user.stub";
+import Error = firebase.auth.Error;
 
 describe('FirebaseService', () => {
     const email = 'someone@somewhere.com';
     const name = 'someone';
     const password = 'password';
-    let firebaseAuth: Auth;
+    let firebaseAuth: FirebaseAuthStub;
     let firebaseService: AuthService;
     let credentials: LoginCredentials;
 
@@ -29,6 +30,81 @@ describe('FirebaseService', () => {
 
     it('on construction isUserLoggedIn returns false', () => {
        expect(firebaseService.isUserLoggedIn()).toBeFalsy();
+    });
+
+    describe('onAuthStateChanged', () => {
+
+        it('to user sets isUserLoggedIn to true', () => {
+            firebaseAuth.executeOnAuthStateChangedSuccess(new FirebaseUserStub());
+            expect(firebaseService.isUserLoggedIn()).toBeTruthy();
+        });
+
+        it('to null sets isUserLoggedIn to false', () => {
+            firebaseAuth.executeOnAuthStateChangedSuccess(null);
+            expect(firebaseService.isUserLoggedIn()).toBeFalsy();
+        });
+
+        it('to user calls next on observers with user', () => {
+            let fbUser = new FirebaseUserStub();
+            fbUser.email = "email";
+            fbUser.displayName = "name";
+            fbUser.uid = "1234";
+
+            let expectedUser: User;
+            expectedUser = {
+                email: fbUser.email,
+                name: fbUser.displayName,
+                uid: fbUser.uid
+            };
+
+            let actualUser = null;
+            firebaseService.onUserLogInStateChanged().subscribe((user: User) => {
+                actualUser = user;
+            });
+
+            firebaseAuth.executeOnAuthStateChangedSuccess(fbUser);
+
+            expect(actualUser).toEqual(expectedUser);
+        });
+
+        it('to null calls next on observers with null', () => {
+            let actualUser: User;
+            actualUser = {
+                email: 'email',
+                name: 'name',
+                uid: '1234'
+            };
+            firebaseService.onUserLogInStateChanged().subscribe((user: User) => {
+                actualUser = user;
+            });
+
+            firebaseAuth.executeOnAuthStateChangedSuccess(null);
+
+            expect(actualUser).toBeNull();
+        });
+
+        it('on error calls error on observers', () => {
+            let msg = null;
+            firebaseService.onUserLogInStateChanged().subscribe(
+                () => {},
+                (err: string) => {msg = err});
+
+            firebaseAuth.executeOnAuthStateChangedError({code: '1234', message: 'something went wrong'});
+
+            expect(msg).toEqual('something went wrong');
+        });
+
+        it('on complete calls complete on observers', () => {
+            let completeCalled = false;
+            firebaseService.onUserLogInStateChanged().subscribe(
+                () => {},
+                () => {},
+                () => { completeCalled = true; });
+
+            firebaseAuth.executeOnAuthStateChangedComplete();
+
+            expect(completeCalled).toBeTruthy();
+        });
     });
 
     describe('on logIn', () => {
@@ -68,13 +144,6 @@ describe('FirebaseService', () => {
                 });
             tick();
             expect(user).toEqual(expectedUser);
-        }));
-
-        it('isUserLoggedIn returns true when firebase resolves', fakeAsync(() => {
-            spy.and.returnValue(Promise.resolve(firebaseUser));
-            firebaseService.logIn(credentials).subscribe();
-            tick();
-            expect(firebaseService.isUserLoggedIn()).toBeTruthy();
         }));
 
         it('returns UserNotFound when firebase rejects with user-not-found', fakeAsync(() => {
@@ -144,6 +213,17 @@ describe('FirebaseService', () => {
             tick();
             expect(firebaseService.isUserLoggedIn()).toBeFalsy();
         }));
+
+        it('calls next on observers', fakeAsync(() => {
+            let isCalled = false;
+            spySignIn.and.returnValue(Promise.resolve({}));
+            spySignOut.and.returnValue(Promise.resolve({}));
+            firebaseService.logIn(credentials).subscribe();
+            tick();
+            firebaseService.logOut().subscribe(() => { isCalled = true; });
+            tick();
+            expect(isCalled).toBeTruthy();
+        }))
     });
 
     describe('on createUser', () => {
