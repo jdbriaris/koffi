@@ -1,18 +1,21 @@
-import {Injectable, Inject} from '@angular/core';
+import {Injectable, Inject, NgZone} from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import * as firebase from 'firebase';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/delay';
 import {
-    AuthService, LogInError, LoginCredentials, NewUser, User, CreateUserError,
+    AuthService, LogInError, LoginCredentials, NewUser, CreateUserError,
     ResetPasswordError
 } from "./auth.service";
 import {FIREBASE_AUTH} from "./firebase.app.provider";
 import Auth = firebase.auth.Auth;
 import FirebaseUser = firebase.User;
 import Error = firebase.auth.Error;
-import {Subject} from "rxjs/Subject";
+import {Observer} from "rxjs/Observer";
+import {observeOn} from "rxjs/operator/observeOn";
+import {ZoneScheduler} from "../utils/utils";
+import {User} from "../auth/user";
 
 const firebaseSignInErrors = {
     'auth/user-not-found': LogInError.UserNotFound,
@@ -27,50 +30,40 @@ const firebaseCreateUserErrors = {
 };
 
 const firebaseSendResetPasswordEmailErrors = {
-    'auth/invalid-email': ResetPasswordError.InavlidEmail,
+    'auth/invalid-email': ResetPasswordError.InvalidEmail,
     'auth/user-not-found': ResetPasswordError.UserNotFound
 };
 
 @Injectable()
 export class FirebaseService implements AuthService {
-    private userLogInStateSubject: Subject<User>;
-    private userLoggedIn = false;
 
-    constructor(@Inject(FIREBASE_AUTH) private firebaseApp: Auth) {
-        this.userLogInStateSubject = new Subject();
+    constructor(
+        @Inject(FIREBASE_AUTH) private firebaseApp: Auth,
+        private zone: NgZone
+    ) {}
 
-        firebaseApp.onAuthStateChanged(
-            (fbUser: FirebaseUser) =>
-                this.onFirebaseAuthStateChanged(fbUser, this.userLogInStateSubject),
-            (fbError: Error) =>
-                this.userLogInStateSubject.error(fbError.message),
-            () => {
-                this.userLogInStateSubject.complete()
-            }
-        );
-    }
-
-    private onFirebaseAuthStateChanged(fbUser: FirebaseUser, subject: Subject<User>): void {
-        if (fbUser) {
-            let user = this.makeUserFromFbUser(fbUser);
-            this.userLoggedIn = true;
-            subject.next(user);
-        }
-        else {
-            this.userLoggedIn = false;
-            subject.next(null);
-        }
-    }
-
-    onUserLogInStateChanged(): Subject<User> {
-        return this.userLogInStateSubject;
-    }
+    onUserLogInStateChanged(): Observable<User> {
+        const logInState = Observable.create((observer: Observer<User>) => {
+            this.firebaseApp.onAuthStateChanged(
+                (user?: firebase.User) => {
+                    if (user) {
+                        observer.next(FirebaseService.createUser(user));
+                    } else {
+                        observer.next(null);
+                    }
+                },
+                (error: firebase.auth.Error) => observer.error(error),
+                () => observer.complete()
+            )
+        });
+        return observeOn.call(logInState, new ZoneScheduler(this.zone));
+    };
 
     logIn(credentials: LoginCredentials): Observable<User> {
         return Observable.create(obs => {
             this.firebaseApp.signInWithEmailAndPassword(credentials.email, credentials.password)
                 .then((res: any) => {
-                    let user = this.makeUserFromFbUser(res as firebase.User);
+                    let user = FirebaseService.createUser(res as firebase.User);
                     obs.next(user);
                 })
                 .catch((err: any) => {
@@ -91,17 +84,11 @@ export class FirebaseService implements AuthService {
         });
     };
 
-    createUser(newUser: NewUser): Observable<User> {
+    createNewUser(newUser: NewUser): Observable<User> {
         return Observable.create(obs => {
             this.firebaseApp.createUserWithEmailAndPassword(newUser.email, newUser.password)
                 .then((res: FirebaseUser) => {
-                    let user: User;
-                    user = {
-                        name: res.displayName,
-                        email: res.email,
-                        uid: res.uid
-                    };
-                    this.userLoggedIn = true;
+                    let user = FirebaseService.createUser(res);
                     obs.next(user);
                 })
                 .catch((err: any) => {
@@ -113,10 +100,6 @@ export class FirebaseService implements AuthService {
             });
         });
     };
-
-    isUserLoggedIn(): boolean {
-        return this.userLoggedIn;
-    }
 
     resetPassword(email: string): Observable<void> {
         return Observable.create(obs => {
@@ -134,7 +117,7 @@ export class FirebaseService implements AuthService {
         });
     };
 
-    private makeUserFromFbUser(fbUser: firebase.User) {
+    private static createUser(fbUser: firebase.User) : User {
         let user: User;
         user = {
             email: fbUser.email,
@@ -142,5 +125,5 @@ export class FirebaseService implements AuthService {
             uid: fbUser.uid
         };
         return user;
-    }
+    };
 }

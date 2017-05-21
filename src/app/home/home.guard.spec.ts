@@ -36,7 +36,7 @@ describe('AuthGuard', () => {
         authServiceSpy.and.returnValue(false);
         authGuard.canActivate();
         expect(routerSpy).toHaveBeenCalledTimes(1);
-        expect(routerSpy).toHaveBeenCalledWith(['/login']);
+        expect(routerSpy).toHaveBeenCalledWith(['/auth']);
     });
 
     it('on canActivate returns true if user logged in', () => {

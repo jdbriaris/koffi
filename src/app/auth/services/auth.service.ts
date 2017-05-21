@@ -1,17 +1,12 @@
 import {Observable} from "rxjs/Observable";
 import {OpaqueToken} from "@angular/core";
+import {User} from "../auth/user";
 
 export let AUTH_SERVICE = new OpaqueToken('auth.service');
 
 export interface LoginCredentials {
     email: string,
     password: string
-}
-
-export interface User {
-    name: string;
-    email: string;
-    uid: string;
 }
 
 export interface NewUser {
@@ -34,16 +29,15 @@ export enum CreateUserError {
 }
 
 export enum ResetPasswordError {
-    'InavlidEmail',
-    'UserNotFound',
-    'Failed'
+    InvalidEmail,
+    UserNotFound,
+    Failed
 }
 
 export interface AuthService {
     logIn(credentials: LoginCredentials): Observable<User>;
     logOut(): Observable<void>;
-    createUser(newUser: NewUser): Observable<User>;
-    isUserLoggedIn() : boolean;
+    createNewUser(newUser: NewUser): Observable<User>;
     resetPassword(email: string): Observable<void>;
     onUserLogInStateChanged(): Observable<User>;
 }

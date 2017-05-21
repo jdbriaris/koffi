@@ -226,7 +226,7 @@ describe('FirebaseService', () => {
         }))
     });
 
-    describe('on createUser', () => {
+    describe('on createNewUser', () => {
         let spy: Spy;
         let newUser: NewUser;
         let err: CreateUserError;
@@ -243,7 +243,7 @@ describe('FirebaseService', () => {
 
         it('calls createUserWithEmailAndPassword on firebase', () => {
             spy.and.returnValue(Promise.resolve({}));
-            firebaseService.createUser(newUser).subscribe();
+            firebaseService.createNewUser(newUser).subscribe();
             expect(spy).toHaveBeenCalledTimes(1);
             expect(spy).toHaveBeenCalledWith(newUser.email, newUser.password);
         });
@@ -268,7 +268,7 @@ describe('FirebaseService', () => {
                     uid: uid
                 };
                 spy.and.returnValue(Promise.resolve(firebaseUser));
-                firebaseService.createUser(newUser).subscribe(
+                firebaseService.createNewUser(newUser).subscribe(
                     (u: User) => {
                         user = u;
                     });
@@ -279,7 +279,7 @@ describe('FirebaseService', () => {
             it('sets isUserLoggedIn to true when firebase resolves with firebase user', fakeAsync(() => {
                 expect(firebaseService.isUserLoggedIn()).toBeFalsy();
                 spy.and.returnValue(Promise.resolve(firebaseUser));
-                firebaseService.createUser(newUser).subscribe();
+                firebaseService.createNewUser(newUser).subscribe();
                 tick();
                 expect(firebaseService.isUserLoggedIn()).toBeTruthy();
             }));
@@ -289,7 +289,7 @@ describe('FirebaseService', () => {
         it('returns EmailAlreadyRegistered when firebase rejects with email-already-in-use', fakeAsync(() => {
             err = CreateUserError.InvalidEmail;
             spy.and.returnValue(Promise.reject({code: 'auth/email-already-in-use', message: ''}));
-            firebaseService.createUser(newUser).subscribe(
+            firebaseService.createNewUser(newUser).subscribe(
                 () => {},
                 (res: CreateUserError) => {
                     err = res;
@@ -301,7 +301,7 @@ describe('FirebaseService', () => {
         it('returns InvalidEmail when firebase rejects with invalid-email', fakeAsync(() => {
             err = CreateUserError.EmailAlreadyRegistered;
             spy.and.returnValue(Promise.reject({code: 'auth/invalid-email', message: ''}));
-            firebaseService.createUser(newUser).subscribe(
+            firebaseService.createNewUser(newUser).subscribe(
                 () => {},
                 (res: CreateUserError) => {
                     err = res;
@@ -313,7 +313,7 @@ describe('FirebaseService', () => {
         it('returns WeakPassword when firebase rejects with weak-password', fakeAsync(() => {
             err = CreateUserError.EmailAlreadyRegistered;
             spy.and.returnValue(Promise.reject({code: 'auth/weak-password', message: ''}));
-            firebaseService.createUser(newUser).subscribe(
+            firebaseService.createNewUser(newUser).subscribe(
                 () => {},
                 (res: CreateUserError) => {
                     err = res;
@@ -325,7 +325,7 @@ describe('FirebaseService', () => {
         it('returns Failed when firebase rejects with unknown error', fakeAsync(() => {
             err = CreateUserError.InvalidEmail;
             spy.and.returnValue(Promise.reject({code: 'some unknown string', message: ''}));
-            firebaseService.createUser(newUser).subscribe(
+            firebaseService.createNewUser(newUser).subscribe(
                 () => {},
                 (res: CreateUserError) => {
                     err = res;
@@ -370,11 +370,11 @@ describe('FirebaseService', () => {
                     result = err;
                 });
             tick();
-            expect(result).toEqual(ResetPasswordError.InavlidEmail);
+            expect(result).toEqual(ResetPasswordError.InvalidEmail);
         }));
 
         it('returns UserNotFound when firebase rejects with auth/user-not-found', fakeAsync(() => {
-            let result = ResetPasswordError.InavlidEmail;
+            let result = ResetPasswordError.InvalidEmail;
             let fbError = {code: 'auth/user-not-found', message: ''};
             spy.and.returnValue(Promise.reject(fbError));
             firebaseService.resetPassword(credentials.email).subscribe(
@@ -387,7 +387,7 @@ describe('FirebaseService', () => {
         }));
 
         it('returns Failed when firebase rejects with unknown error', fakeAsync(() => {
-            let result = ResetPasswordError.InavlidEmail;
+            let result = ResetPasswordError.InvalidEmail;
             spy.and.returnValue(Promise.reject('some unknown error'));
             firebaseService.resetPassword(credentials.email).subscribe(
                 () => {},
