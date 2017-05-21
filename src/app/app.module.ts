@@ -2,30 +2,23 @@ import {NgModule} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
 import {AppComponent} from "./app.component";
 import {AppRoutingModule} from "./app-routing.module";
-import {LoginModule} from "./login/login.module";
-import {RegisterModule} from "./register/register.module";
-import {FirebaseService} from "./services/firebase.service";
-import {RegisterReviewModule} from "./register-review/register-review.module";
+import {FirebaseService} from "./auth/services/firebase.service";
 import {HomeModule} from "./home/home.module";
-import {AUTH_SERVICE} from "./services/auth.service";
-import {FIREBASE_AUTH, firebaseAppFactory} from "./services/firebase.app.provider";
-import {ForgotPasswordModule} from "./forgot-password/forgot-password.module";
-
+import {AUTH_SERVICE} from "./auth/services/auth.service";
+import {FIREBASE_AUTH, firebaseAuthFactory} from "./auth/services/firebase.auth.provider";
+import {AuthModule} from "./auth/auth.module";
 
 @NgModule({
     imports: [
         BrowserModule,
-        LoginModule,
-        RegisterModule,
-        RegisterReviewModule,
-        ForgotPasswordModule,
+        AuthModule,
         HomeModule,
         AppRoutingModule
     ],
     declarations: [AppComponent],
     bootstrap: [AppComponent],
     providers: [
-        { provide: FIREBASE_AUTH, useFactory: firebaseAppFactory },
+        { provide: FIREBASE_AUTH, useFactory: firebaseAuthFactory },
         { provide: AUTH_SERVICE, useClass: FirebaseService }
     ]
 })

@@ -11,7 +11,7 @@ const config = {
 
 export let FIREBASE_AUTH = new OpaqueToken('firebase.auth');
 
-export let firebaseAppFactory = () => {
+export let firebaseAuthFactory = () => {
     firebase.initializeApp(config);
     return firebase.app().auth();
 };

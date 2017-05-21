@@ -1,7 +1,7 @@
 import {Component, OnInit, NgZone, Inject} from '@angular/core';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {FormGroup, FormBuilder, Validators, FormControl, AbstractControl} from "@angular/forms";
-import '../styles/forms.scss';
+import '../../styles/forms.scss';
 import {AuthService, AUTH_SERVICE, CreateUserError, NewUser} from "../services/auth.service";
 
 @Component({
@@ -37,6 +37,7 @@ export class RegisterComponent implements OnInit {
         @Inject(AUTH_SERVICE) private authService: AuthService,
         private formBuilder: FormBuilder,
         private router: Router,
+        private route: ActivatedRoute,
         private ngZone: NgZone
     ) {}
 
@@ -88,7 +89,7 @@ export class RegisterComponent implements OnInit {
         this.validateForm();
         if (this.registerForm.invalid) return;
 
-        this.authService.createUser(newUser)
+        this.authService.createNewUser(newUser)
             .subscribe(
                 () => {
                     this.router.navigate(['/home']);
@@ -127,11 +128,7 @@ export class RegisterComponent implements OnInit {
         this.ngZone.run(() => {this.formErrors[key] = msg;});
     };
 
-    private navigateTo(url: string): void {
-        this.router.navigate(([url]));
-    }
-
     logIn(): void {
-        this.navigateTo('/login');
+        this.router.navigate(['login'], {relativeTo: this.route.parent});
     };
 }

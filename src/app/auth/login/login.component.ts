@@ -1,8 +1,9 @@
 import {Component, OnInit, NgZone, Inject} from '@angular/core';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {FormGroup, FormBuilder, FormControl, Validators, AbstractControl} from "@angular/forms";
-import '../styles/forms.scss';
-import {AuthService, AUTH_SERVICE, LogInError, LoginCredentials, User} from "../services/auth.service";
+import '../../styles/forms.scss';
+import {AuthService, AUTH_SERVICE, LogInError, LoginCredentials} from "../services/auth.service";
+import {User} from "../user";
 
 @Component({
     moduleId: 'module.id',
@@ -31,6 +32,7 @@ export class LoginComponent implements OnInit {
         private formBuilder: FormBuilder,
         @Inject(AUTH_SERVICE) private authService: AuthService,
         private router: Router,
+        private route: ActivatedRoute,
         private zone: NgZone
     ) {}
 
@@ -95,7 +97,7 @@ export class LoginComponent implements OnInit {
 
         this.authService.logIn(credentials).subscribe(
             (user: User) => {
-                this.router.navigate(['/home']);
+                this.router.navigate(['home'], {relativeTo: this.route.root});
             },
             (err: LogInError) => {
                 switch (err) {
@@ -117,11 +119,11 @@ export class LoginComponent implements OnInit {
     };
 
     register(): void {
-        this.router.navigate(['/register']);
+        this.router.navigate(['register'], {relativeTo: this.route.parent});
     };
 
     forgotPassword(): void {
-        this.router.navigate(['/forgot-password']);
+        this.router.navigate(['forgot-password'], {relativeTo: this.route.parent});
     };
 }
 

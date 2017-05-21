@@ -1,6 +1,6 @@
 import {Observable} from "rxjs/Observable";
 import {OpaqueToken} from "@angular/core";
-import {User} from "../auth/user";
+import {User} from "../user";
 
 export let AUTH_SERVICE = new OpaqueToken('auth.service');
 
@@ -16,16 +16,16 @@ export interface NewUser {
 }
 
 export enum LogInError {
-    'UserNotFound',
-    'WrongPassword',
-    'Failed'
+    UserNotFound,
+    WrongPassword,
+    Failed
 }
 
 export enum CreateUserError {
-    'Failed',
-    'EmailAlreadyRegistered',
-    'InvalidEmail',
-    'WeakPassword'
+    Failed,
+    EmailAlreadyRegistered,
+    InvalidEmail,
+    WeakPassword
 }
 
 export enum ResetPasswordError {

@@ -1,7 +1,7 @@
 import {Component, OnInit, NgZone, Inject} from "@angular/core";
 import {FormGroup, FormBuilder, FormControl, Validators, AbstractControl} from "@angular/forms";
 import {Router} from "@angular/router";
-import '../styles/forms.scss';
+import '../../styles/forms.scss';
 import {AuthService, AUTH_SERVICE, ResetPasswordError} from "../services/auth.service";
 
 @Component({
@@ -77,7 +77,7 @@ export class ForgotPasswordComponent implements OnInit {
                 () => {},
                 (err: ResetPasswordError) => {
                     switch (err) {
-                        case ResetPasswordError.InavlidEmail:
+                        case ResetPasswordError.InvalidEmail:
                             this.emailControl.setValue('');
                             this.updateFormError('email', 'Enter a valid email address');
                             break;

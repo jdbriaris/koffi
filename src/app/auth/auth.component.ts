@@ -1,3 +1,7 @@
-/**
- * Created by James on 5/1/2017.
- */
+import {Component} from "@angular/core";
+
+@Component({
+    moduleId: 'module.id',
+    templateUrl: './auth.component.html'
+})
+export class AuthComponent {}

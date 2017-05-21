@@ -3,11 +3,13 @@ import {LoginComponent} from "./login.component";
 import {DebugElement} from "@angular/core";
 import {By} from "@angular/platform-browser";
 import {ReactiveFormsModule} from "@angular/forms";
-import {Router} from "@angular/router";
-import {AUTH_SERVICE, LogInError, User} from "../services/auth.service";
+import {ActivatedRoute, Router} from "@angular/router";
+import {AUTH_SERVICE, LogInError} from "../services/auth.service";
 import Spy = jasmine.Spy;
-import {RouterStub} from "../testing/router.stub";
-import {AuthServiceStub} from "../testing/auth.service.stub";
+import {RouterStub} from "../../testing/router.stub";
+import {AuthServiceStub} from "../../testing/auth.service.stub";
+import createSpyObj = jasmine.createSpyObj;
+import {User} from "../user";
 
 class LoginPage {
     loginForm: DebugElement;
@@ -64,14 +66,17 @@ describe('A LoginComponent', () => {
     let de: DebugElement;
     let el: HTMLElement;
     let loginPage: LoginPage;
+    let activatedRoute: ActivatedRoute;
 
     beforeEach(async(() => {
+        activatedRoute = createSpyObj<ActivatedRoute>('activatedRoute', ['root', 'parent']);
         TestBed.configureTestingModule({
             imports: [ReactiveFormsModule],
             declarations: [LoginComponent],
             providers: [
                 {provide: AUTH_SERVICE, useClass: AuthServiceStub},
-                {provide: Router, useClass: RouterStub}
+                {provide: Router, useClass: RouterStub},
+                {provide: ActivatedRoute, useValue: activatedRoute}
             ]
         });
     }));
@@ -196,19 +201,19 @@ describe('A LoginComponent', () => {
                 authService.setLogInResult(user);
                 loginPage.userEntersEmail('email').userEntersPassword('password').userPressesLogIn();
                 expect(routerSpy).toHaveBeenCalledTimes(1);
-                expect(routerSpy).toHaveBeenCalledWith(['/home']);
+                expect(routerSpy).toHaveBeenCalledWith(['home'], {relativeTo: activatedRoute.root});
             });
 
             it('register when user has clicked to create an account', () => {
                 loginPage.userPressesRegisterButton();
                 expect(routerSpy).toHaveBeenCalledTimes(1);
-                expect(routerSpy).toHaveBeenCalledWith(['/register']);
+                expect(routerSpy).toHaveBeenCalledWith(['register'], {relativeTo: activatedRoute.parent});
             });
 
             it('forgot password when user has clicked forgot password', () => {
                 loginPage.userPressesForgotPasswordButton();
                 expect(routerSpy).toHaveBeenCalledTimes(1);
-                expect(routerSpy).toHaveBeenCalledWith(['/forgot-password']);
+                expect(routerSpy).toHaveBeenCalledWith(['forgot-password'], {relativeTo: activatedRoute.parent});
             });
         });
     });

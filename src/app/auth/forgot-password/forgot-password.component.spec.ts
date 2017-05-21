@@ -2,9 +2,9 @@ import {DebugElement} from "@angular/core";
 import {ComponentFixture, TestBed, async} from "@angular/core/testing";
 import {ForgotPasswordComponent} from "./forgot-password.component";
 import {By} from "@angular/platform-browser";
-import {RouterStub} from "../testing/router.stub";
+import {RouterStub} from "../../testing/router.stub";
 import {Router} from "@angular/router";
-import {AuthServiceStub} from "../testing/auth.service.stub";
+import {AuthServiceStub} from "../../testing/auth.service.stub";
 import {AUTH_SERVICE, ResetPasswordError} from "../services/auth.service";
 import {ReactiveFormsModule} from "@angular/forms";
 import Spy = jasmine.Spy;
@@ -94,7 +94,7 @@ describe('ForgotPasswordComponent', () => {
         });
 
         it('shows invalid email error if AuthService returns invalid email', () => {
-            authService.setResetPasswordError(ResetPasswordError.InavlidEmail);
+            authService.setResetPasswordError(ResetPasswordError.InvalidEmail);
             page.userEntersEmail('some invalid email').userPressesContinue();
             fixture.detectChanges();
             let emailError = fixture.debugElement.query(By.css('#email-error')).nativeElement;
@@ -102,14 +102,14 @@ describe('ForgotPasswordComponent', () => {
         });
 
         it('removes email input if AuthService returns invalid email', () => {
-            authService.setResetPasswordError(ResetPasswordError.InavlidEmail);
+            authService.setResetPasswordError(ResetPasswordError.InvalidEmail);
             page.userEntersEmail('some invalid email').userPressesContinue();
             fixture.detectChanges();
             expect(page.emailInput.value).toBe('');
         });
 
         it('clears invalid email error if AuthService returns invalid email and user starts entering new email', () => {
-            authService.setResetPasswordError(ResetPasswordError.InavlidEmail);
+            authService.setResetPasswordError(ResetPasswordError.InvalidEmail);
             page.userEntersEmail('some invalid email').userPressesContinue();
             fixture.detectChanges();
             page.userEntersEmail('s');

@@ -1,3 +1,5 @@
-/**
- * Created by James on 5/18/2017.
- */
+export interface User {
+    name: string;
+    email: string;
+    uid: string;
+}

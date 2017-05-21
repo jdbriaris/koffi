@@ -20,14 +20,14 @@ export class RegisterReviewComponent implements OnInit{
     };
 
     logIn(): void {
-        this.router.navigate(['/login']);
+        this.router.navigate(['login'], {relativeTo: this.route.parent});
     };
 
     register(): void {
-        this.router.navigate(['/register']);
+        this.router.navigate(['register'], {relativeTo: this.route.parent});
     };
 
     forgotPassword(): void {
-        this.router.navigate(['/forgot-password']);
+        this.router.navigate(['forgot-password'], {relativeTo: this.route.parent});
     };
 }

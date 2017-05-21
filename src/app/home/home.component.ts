@@ -1,5 +1,5 @@
 import {Component, Inject} from '@angular/core';
-import {AUTH_SERVICE, AuthService} from "../services/auth.service";
+import {AUTH_SERVICE, AuthService} from "../auth/services/auth.service";
 import {Router} from "@angular/router";
 
 @Component({
@@ -15,7 +15,7 @@ export class HomeComponent{
 
     signOut(): void {
         this.authService.logOut().subscribe(() => {
-           this.router.navigate(['']);
+           this.router.navigate(['auth']);
         });
     }
 }

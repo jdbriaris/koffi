@@ -1,10 +1,11 @@
 import {Injectable} from "@angular/core";
 import {
-    AuthService, LogInError, LoginCredentials, NewUser, User, CreateUserError,
+    AuthService, LogInError, LoginCredentials, NewUser, CreateUserError,
     ResetPasswordError
-} from "../services/auth.service";
+} from "../auth/services/auth.service";
 import {Observable} from "rxjs/Observable";
 import {BehaviorSubject} from "rxjs/BehaviorSubject";
+import {User} from "../auth/user";
 
 @Injectable()
 export class AuthServiceStub implements AuthService {
@@ -24,7 +25,7 @@ export class AuthServiceStub implements AuthService {
         this.logInBehavior = new BehaviorSubject(user);
         this.createUserBehavior = new BehaviorSubject(user);
         this.userLogInStateChangedBehavior = new BehaviorSubject(user);
-        this.resetPasswordBehavior = new BehaviorSubject(ResetPasswordError.InavlidEmail);
+        this.resetPasswordBehavior = new BehaviorSubject(ResetPasswordError.InvalidEmail);
 
         this.logInParams = this.logInBehavior.asObservable();
         this.createUserParams = this.createUserBehavior.asObservable();
@@ -48,7 +49,7 @@ export class AuthServiceStub implements AuthService {
         return this.resetPasswordParams;
     }
 
-    createUser(newUser: NewUser): Observable<User> {
+    createNewUser(newUser: NewUser): Observable<User> {
         return this.createUserParams;
     }
 

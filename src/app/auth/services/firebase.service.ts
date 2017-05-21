@@ -8,14 +8,14 @@ import {
     AuthService, LogInError, LoginCredentials, NewUser, CreateUserError,
     ResetPasswordError
 } from "./auth.service";
-import {FIREBASE_AUTH} from "./firebase.app.provider";
+import {FIREBASE_AUTH} from "./firebase.auth.provider";
 import Auth = firebase.auth.Auth;
 import FirebaseUser = firebase.User;
 import Error = firebase.auth.Error;
 import {Observer} from "rxjs/Observer";
 import {observeOn} from "rxjs/operator/observeOn";
-import {ZoneScheduler} from "../utils/utils";
-import {User} from "../auth/user";
+import {ZoneScheduler} from "../../utils/utils";
+import {User} from "../user";
 
 const firebaseSignInErrors = {
     'auth/user-not-found': LogInError.UserNotFound,
