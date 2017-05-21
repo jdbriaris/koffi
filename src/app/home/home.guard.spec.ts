@@ -1,49 +1,82 @@
 import {TestBed, async} from "@angular/core/testing";
 import {RouterStub} from "../testing/router.stub";
 import {Router} from "@angular/router";
-import {AuthServiceStub} from "../testing/auth.service.stub";
 import {AUTH_SERVICE, AuthService} from "../auth/services/auth.service";
 import {HomeGuard} from "./home.guard";
 import Spy = jasmine.Spy;
+import createSpyObj = jasmine.createSpyObj;
+import {BehaviorSubject} from "rxjs/BehaviorSubject";
+import {User} from "../auth/user";
+
+
+class TestFixture {
+    mockAuthService: AuthService;
+    mockRouter: Router;
+    private logInStateChangedBehavior: BehaviorSubject<User>;
+
+    constructor(){
+        this.mockAuthService = this.createMockAuthService();
+        this.mockRouter = this.createMockRouter();
+    }
+
+    public onUserLogInStateChangedReturns(user: User) {
+        this.logInStateChangedBehavior.next(user);
+    }
+
+    private createMockAuthService(): AuthService {
+        this.logInStateChangedBehavior = new BehaviorSubject(null);
+
+        let authService = createSpyObj<AuthService>('mockAuthService', ['onUserLogInStateChanged']);
+
+        (authService.onUserLogInStateChanged as Spy).and
+            .callFake(() => { return this.logInStateChangedBehavior.asObservable(); });
+
+        return authService;
+    }
+
+    private createMockRouter(): Router {
+        return createSpyObj<Router>('mockRouter', ['navigate']);
+    }
+}
 
 describe('HomeGuard', () => {
     let router: Router;
     let authService: AuthService;
     let authGuard: HomeGuard;
-    let authServiceSpy: Spy;
+    let testFixture: TestFixture;
 
+    beforeEach(() => {
+        testFixture = new TestFixture();
+        TestBed.configureTestingModule({
+            providers: [
+                {provide: AUTH_SERVICE, useValue: testFixture.mockAuthService},
+                {provide: Router, useValue: testFixture.mockRouter}
+            ]
+        });
+        router = TestBed.get(Router);
+        authService = TestBed.get(AUTH_SERVICE);
+        authGuard = new HomeGuard(authService, router);
+    });
 
-    //TODO
-    // beforeEach(() => {
-    //     TestBed.configureTestingModule({
-    //         providers: [
-    //             {provide: AUTH_SERVICE, useClass: AuthServiceStub},
-    //             {provide: Router, useClass: RouterStub}
-    //         ]
-    //     });
-    //     router = TestBed.get(Router);
-    //     authService = TestBed.get(AUTH_SERVICE);
-    //     authGuard = new HomeGuard(authService, router);
-    //     authServiceSpy = spyOn(authService, 'isUserLoggedIn');
-    // });
-    //
-    // it('on canActivate returns false if user not logged in', () => {
-    //     authServiceSpy.and.returnValue(false);
-    //     authGuard.canActivate();
-    //     expect(authGuard.canActivate()).toBeFalsy();
-    // });
-    //
-    // it('on canActivate navigates to login if user not logged in', () => {
-    //     let routerSpy = spyOn(router, 'navigate');
-    //     authServiceSpy.and.returnValue(false);
-    //     authGuard.canActivate();
-    //     expect(routerSpy).toHaveBeenCalledTimes(1);
-    //     expect(routerSpy).toHaveBeenCalledWith(['/auth']);
-    // });
-    //
-    // it('on canActivate returns true if user logged in', () => {
-    //     authServiceSpy.and.returnValue(true);
-    //     authGuard.canActivate();
-    //     expect(authGuard.canActivate()).toBeTruthy();
-    // });
+    it('on canActivate with user logged in return true', () => {
+        testFixture.onUserLogInStateChangedReturns({name: "name",  email: "password", uid: "uid"});
+        authGuard.canActivate().subscribe((activate: boolean) => {
+            expect(authService.onUserLogInStateChanged).toHaveBeenCalledTimes(1);
+            expect(activate).toBeTruthy();
+        });
+    });
+
+    it('on canActivate with user not logged in returns false', () => {
+        authGuard.canActivate().subscribe((activate: boolean) => {
+            expect(authService.onUserLogInStateChanged).toHaveBeenCalledTimes(1);
+            expect(activate).toBeFalsy();
+        });
+    });
+
+    it('on canActivate with user not logged navigates to auth', () => {
+        authGuard.canActivate().subscribe(() => {
+            expect(router.navigate).toHaveBeenCalledWith(['auth']);
+        });
+    });
+
 });
