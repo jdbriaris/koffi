@@ -10,6 +10,8 @@ import {RouterStub} from "../../testing/router.stub";
 import {AuthServiceStub} from "../../testing/auth.service.stub";
 import createSpyObj = jasmine.createSpyObj;
 import {User} from "../user";
+import {MockRouter} from "../../testing/mock.router";
+import {MockAuthService} from "../testing/mock.auth.service";
 
 class LoginPage {
     loginForm: DebugElement;
@@ -74,8 +76,8 @@ describe('A LoginComponent', () => {
             imports: [ReactiveFormsModule],
             declarations: [LoginComponent],
             providers: [
-                {provide: AUTH_SERVICE, useClass: AuthServiceStub},
-                {provide: Router, useClass: RouterStub},
+                {provide: AUTH_SERVICE, useClass: MockAuthService},
+                {provide: Router, useClass: MockRouter},
                 {provide: ActivatedRoute, useValue: activatedRoute}
             ]
         });

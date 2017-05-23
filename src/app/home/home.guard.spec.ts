@@ -1,56 +1,23 @@
-import {TestBed, async} from "@angular/core/testing";
-import {RouterStub} from "../testing/router.stub";
+import {TestBed} from "@angular/core/testing";
 import {Router} from "@angular/router";
-import {AUTH_SERVICE, AuthService} from "../auth/services/auth.service";
+import {AUTH_SERVICE} from "../auth/services/auth.service";
 import {HomeGuard} from "./home.guard";
 import Spy = jasmine.Spy;
 import createSpyObj = jasmine.createSpyObj;
-import {BehaviorSubject} from "rxjs/BehaviorSubject";
-import {User} from "../auth/user";
-
-
-class TestFixture {
-    mockAuthService: AuthService;
-    mockRouter: Router;
-    private logInStateChangedBehavior: BehaviorSubject<User>;
-
-    constructor(){
-        this.mockAuthService = this.createMockAuthService();
-        this.mockRouter = this.createMockRouter();
-    }
-
-    public onUserLogInStateChangedReturns(user: User) {
-        this.logInStateChangedBehavior.next(user);
-    }
-
-    private createMockAuthService(): AuthService {
-        this.logInStateChangedBehavior = new BehaviorSubject(null);
-
-        let authService = createSpyObj<AuthService>('mockAuthService', ['onUserLogInStateChanged']);
-
-        (authService.onUserLogInStateChanged as Spy).and
-            .callFake(() => { return this.logInStateChangedBehavior.asObservable(); });
-
-        return authService;
-    }
-
-    private createMockRouter(): Router {
-        return createSpyObj<Router>('mockRouter', ['navigate']);
-    }
-}
+import {MockUser} from "../auth/testing/mock.user";
+import {MockRouter} from "../testing/mock.router";
+import {MockAuthService} from "../auth/testing/mock.auth.service";
 
 describe('HomeGuard', () => {
     let router: Router;
-    let authService: AuthService;
+    let authService: MockAuthService;
     let authGuard: HomeGuard;
-    let testFixture: TestFixture;
 
     beforeEach(() => {
-        testFixture = new TestFixture();
         TestBed.configureTestingModule({
             providers: [
-                {provide: AUTH_SERVICE, useValue: testFixture.mockAuthService},
-                {provide: Router, useValue: testFixture.mockRouter}
+                {provide: AUTH_SERVICE, useClass: MockAuthService},
+                {provide: Router, useClass: MockRouter}
             ]
         });
         router = TestBed.get(Router);
@@ -59,7 +26,9 @@ describe('HomeGuard', () => {
     });
 
     it('on canActivate with user logged in return true', () => {
-        testFixture.onUserLogInStateChangedReturns({name: "name",  email: "password", uid: "uid"});
+        authService.setUserLogInStateChangedBehavior(new MockUser());
+        spyOn(authService, 'onUserLogInStateChanged').and.callThrough();
+
         authGuard.canActivate().subscribe((activate: boolean) => {
             expect(authService.onUserLogInStateChanged).toHaveBeenCalledTimes(1);
             expect(activate).toBeTruthy();
@@ -67,6 +36,9 @@ describe('HomeGuard', () => {
     });
 
     it('on canActivate with user not logged in returns false', () => {
+        authService.setUserLogInStateChangedBehavior(null);
+        spyOn(authService, 'onUserLogInStateChanged').and.callThrough();
+
         authGuard.canActivate().subscribe((activate: boolean) => {
             expect(authService.onUserLogInStateChanged).toHaveBeenCalledTimes(1);
             expect(activate).toBeFalsy();
@@ -74,9 +46,11 @@ describe('HomeGuard', () => {
     });
 
     it('on canActivate with user not logged navigates to auth', () => {
+        authService.setUserLogInStateChangedBehavior(null);
+        spyOn(router, 'navigate');
+
         authGuard.canActivate().subscribe(() => {
             expect(router.navigate).toHaveBeenCalledWith(['auth']);
         });
     });
-
 });

@@ -10,3 +10,7 @@ export class ZoneScheduler {
         return <Subscription>this.zone.run(() => queue.schedule.apply(queue, args));
     }
 }
+
+export function isUser(arg: any) : arg is User {
+    return (<User>arg).kind === "user";
+}
