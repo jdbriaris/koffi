@@ -2,7 +2,7 @@ import {Component, OnInit, NgZone, Inject} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {FormGroup, FormBuilder, Validators, FormControl, AbstractControl} from "@angular/forms";
 import '../../styles/forms.scss';
-import {AuthService, AUTH_SERVICE, CreateUserError, NewUser} from "../services/auth.service";
+import {AuthService, AUTH_SERVICE, Credentials} from "../services/auth.service";
 
 @Component({
     moduleId: 'module.id',
@@ -85,33 +85,35 @@ export class RegisterComponent implements OnInit {
         this.formErrors[error] = '';
     }
 
-    register(newUser: NewUser): void {
+    register(credentials: Credentials): void {
         this.validateForm();
         if (this.registerForm.invalid) return;
 
-        this.authService.createNewUser(newUser)
+        this.authService.createNewUser(credentials)
             .subscribe(
                 () => {
                     this.router.navigate(['/home']);
                 },
-                (err: CreateUserError) => {
-                    switch (err) {
-                        case CreateUserError.EmailAlreadyRegistered:
-                            this.router.navigate(['/register-review', this.emailControl.value]);
-                            break;
-                        case CreateUserError.InvalidEmail:
-                            this.passwordControl.setValue('');
-                            this.updateFormError('email', 'Enter a valid email address');
-                            break;
-                        case CreateUserError.WeakPassword:
-                            this.passwordControl.setValue('');
-                            this.updateFormError('password', 'Enter a stronger password');
-                            break;
-                        case CreateUserError.Failed:
-                            this.router.navigate(['/error']);
-                            break;
-                    }
-                });
+                //TODO
+                // (err: CreateUserError) => {
+                //     switch (err) {
+                //         case CreateUserError.EmailAlreadyRegistered:
+                //             this.router.navigate(['/register-review', this.emailControl.value]);
+                //             break;
+                //         case CreateUserError.InvalidEmail:
+                //             this.passwordControl.setValue('');
+                //             this.updateFormError('email', 'Enter a valid email address');
+                //             break;
+                //         case CreateUserError.WeakPassword:
+                //             this.passwordControl.setValue('');
+                //             this.updateFormError('password', 'Enter a stronger password');
+                //             break;
+                //         case CreateUserError.Failed:
+                //             this.router.navigate(['/error']);
+                //             break;
+                //     }
+                // }
+                );
     };
 
     private validateForm() {

@@ -26,9 +26,8 @@ describe('HomeGuard', () => {
     });
 
     it('on canActivate with user logged in return true', () => {
-        authService.setUserLogInStateChangedBehavior(new MockUser());
+        authService.setUserLogInStateChangedBehavior(MockUser);
         spyOn(authService, 'onUserLogInStateChanged').and.callThrough();
-
         authGuard.canActivate().subscribe((activate: boolean) => {
             expect(authService.onUserLogInStateChanged).toHaveBeenCalledTimes(1);
             expect(activate).toBeTruthy();
@@ -38,7 +37,6 @@ describe('HomeGuard', () => {
     it('on canActivate with user not logged in returns false', () => {
         authService.setUserLogInStateChangedBehavior(null);
         spyOn(authService, 'onUserLogInStateChanged').and.callThrough();
-
         authGuard.canActivate().subscribe((activate: boolean) => {
             expect(authService.onUserLogInStateChanged).toHaveBeenCalledTimes(1);
             expect(activate).toBeFalsy();
@@ -48,7 +46,6 @@ describe('HomeGuard', () => {
     it('on canActivate with user not logged navigates to auth', () => {
         authService.setUserLogInStateChangedBehavior(null);
         spyOn(router, 'navigate');
-
         authGuard.canActivate().subscribe(() => {
             expect(router.navigate).toHaveBeenCalledWith(['auth']);
         });

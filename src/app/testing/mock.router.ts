@@ -4,9 +4,6 @@ import {Injectable} from "@angular/core";
 export class MockRouter {
     private navigateReturnPromise: Promise<boolean>;
 
-    constructor() {
-        this.navigateReturnPromise = Promise.resolve(true);
-    }
 
     navigate(): Promise<boolean> {
         return this.navigateReturnPromise;

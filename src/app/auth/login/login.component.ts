@@ -2,7 +2,7 @@ import {Component, OnInit, NgZone, Inject} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {FormGroup, FormBuilder, FormControl, Validators, AbstractControl} from "@angular/forms";
 import '../../styles/forms.scss';
-import {AuthService, AUTH_SERVICE, LogInError, LoginCredentials} from "../services/auth.service";
+import {AuthService, AUTH_SERVICE, Credentials} from "../services/auth.service";
 import {User} from "../user";
 
 @Component({
@@ -89,7 +89,7 @@ export class LoginComponent implements OnInit {
             return;
         }
 
-        let credentials: LoginCredentials;
+        let credentials: Credentials;
         credentials = {
             email: this.emailControl.value,
             password: this.passwordControl.value
@@ -99,22 +99,26 @@ export class LoginComponent implements OnInit {
             (user: User) => {
                 this.router.navigate(['home'], {relativeTo: this.route.root});
             },
-            (err: LogInError) => {
-                switch (err) {
-                    case LogInError.UserNotFound:
-                        this.emailControl.setValue('');
-                        this.passwordControl.setValue('');
-                        this.updateFormError('email', 'Sorry, there is no user registered with that email');
-                        break;
-                    case LogInError.WrongPassword:
-                        this.passwordControl.setValue('');
-                        this.updateFormError('email', 'Your password is incorrect');
-                        break;
-                    case LogInError.Failed:
-                        this.passwordControl.setValue('');
-                        this.updateLogInError('There was a problem logging in');
-                        break;
-                }
+            (err: any) => {
+
+                console.log("WAIT!");
+
+
+                // switch (err) {
+                //     case LogInError.UserNotFound:
+                //         this.emailControl.setValue('');
+                //         this.passwordControl.setValue('');
+                //         this.updateFormError('email', 'Sorry, there is no user registered with that email');
+                //         break;
+                //     case LogInError.WrongPasswordError:
+                //         this.passwordControl.setValue('');
+                //         this.updateFormError('email', 'Your password is incorrect');
+                //         break;
+                //     case LogInError.Failed:
+                //         this.passwordControl.setValue('');
+                //         this.updateLogInError('There was a problem logging in');
+                //         break;
+                // }
         });
     };
 

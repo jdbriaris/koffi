@@ -2,6 +2,7 @@ import {Injectable, Inject} from '@angular/core';
 import {Router, CanActivate} from '@angular/router';
 import {AuthService, AUTH_SERVICE} from "../auth/services/auth.service";
 import {Observable} from "rxjs/Observable";
+import 'rxjs/add/operator/map';
 
 @Injectable()
 export class HomeGuard implements CanActivate {

@@ -1,5 +1,6 @@
 import * as firebase from 'firebase';
-import {OpaqueToken} from "@angular/core";
+import {InjectionToken} from "@angular/core";
+import {FirebaseAuthService} from "./firebase.auth.service";
 
 const config = {
     apiKey: "AIzaSyB5RBALHF5YGi_TK0M-hVyuQdkmHWACQH0",
@@ -9,7 +10,7 @@ const config = {
     messagingSenderId: "154364068514"
 };
 
-export let FIREBASE_AUTH = new OpaqueToken('firebase.auth');
+export let FIREBASE_AUTH = new InjectionToken<FirebaseAuthService>('firebase.auth');
 
 export let firebaseAuthFactory = () => {
     firebase.initializeApp(config);

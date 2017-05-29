@@ -2,7 +2,7 @@ import {Component, OnInit, NgZone, Inject} from "@angular/core";
 import {FormGroup, FormBuilder, FormControl, Validators, AbstractControl} from "@angular/forms";
 import {Router} from "@angular/router";
 import '../../styles/forms.scss';
-import {AuthService, AUTH_SERVICE, ResetPasswordError} from "../services/auth.service";
+import {AuthService, AUTH_SERVICE} from "../services/auth.service";
 
 @Component({
     moduleId: 'module.id',
@@ -75,17 +75,19 @@ export class ForgotPasswordComponent implements OnInit {
         this.authService.resetPassword(this.emailControl.value)
             .subscribe(
                 () => {},
-                (err: ResetPasswordError) => {
-                    switch (err) {
-                        case ResetPasswordError.InvalidEmail:
-                            this.emailControl.setValue('');
-                            this.updateFormError('email', 'Enter a valid email address');
-                            break;
-                        case ResetPasswordError.UserNotFound:
-                            this.emailControl.setValue('');
-                            this.updateFormError('email', 'Sorry, there is no user registered with that email');
-                            break;
-                    }
-                });
+                //TODO
+                // (err: ResetPasswordError) => {
+                //     switch (err) {
+                //         case ResetPasswordError.InvalidEmail:
+                //             this.emailControl.setValue('');
+                //             this.updateFormError('email', 'Enter a valid email address');
+                //             break;
+                //         case ResetPasswordError.UserNotFound:
+                //             this.emailControl.setValue('');
+                //             this.updateFormError('email', 'Sorry, there is no user registered with that email');
+                //             break;
+                //     }
+                // }
+                );
     };
 }

@@ -1,9 +1,9 @@
-import {AuthService, CreateUserError, LoginCredentials, LogInError, NewUser} from "../services/auth.service";
+import {AuthService, Credentials} from "../services/auth.service";
 import {Observable} from "rxjs/Observable";
 import {User} from "../user";
 import {BehaviorSubject} from "rxjs/BehaviorSubject";
 import {Injectable} from "@angular/core";
-import {isUser} from "../../utils/utils";
+import {AuthError} from "../errors/auth.error";
 
 @Injectable()
 export class MockAuthService implements AuthService {
@@ -19,7 +19,7 @@ export class MockAuthService implements AuthService {
         this.resetPasswordBehavior = new BehaviorSubject(null);
     }
 
-    logIn(credentials: LoginCredentials): Observable<User> {
+    logIn(credentials: Credentials): Observable<User> {
         return this.logInBehavior.asObservable();
     }
 
@@ -27,7 +27,7 @@ export class MockAuthService implements AuthService {
         throw new Error("Method not implemented.");
     }
 
-    createNewUser(newUser: NewUser): Observable<User> {
+    createNewUser(credentials: Credentials): Observable<User> {
         return this.createNewUserBehavior.asObservable();
     }
 
@@ -41,28 +41,26 @@ export class MockAuthService implements AuthService {
 
     //region Mock Setters
 
-    setLogInBehavior(behavior: User | LogInError): void {
-        if (isUser(behavior)) {
-            this.logInBehavior.next(behavior);
+    setLogInBehavior(behavior: User | AuthError): void {
+        MockAuthService.serBehavior(behavior, this.logInBehavior);
+    }
+
+    setCreateNewUserBehavior(behavior: User | AuthError): void {
+        MockAuthService.serBehavior(behavior, this.createNewUserBehavior);
+    }
+
+    setUserLogInStateChangedBehavior(behavior: User | AuthError): void {
+        MockAuthService.serBehavior(behavior, this.userLogInStateChangedBehavior);
+    }
+
+    private static serBehavior(behavior: User | AuthError, subject: BehaviorSubject<User>) {
+        if (behavior instanceof AuthError) {
+            subject.error(behavior);
         }
         else {
-            this.logInBehavior.error(behavior);
+            subject.next(behavior);
         }
     }
-
-    setCreateNewUserBehavior(behavior: User | CreateUserError): void {
-        if (isUser(behavior)) {
-            this.createNewUserBehavior.next(behavior);
-        }
-        else {
-            this.createNewUserBehavior.error(behavior);
-        }
-    }
-
-    setUserLogInStateChangedBehavior(user: User): void {
-        this.userLogInStateChangedBehavior.next(user);
-    }
-
 
     //endregion
 
