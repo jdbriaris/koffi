@@ -4,13 +4,14 @@ import {DebugElement} from "@angular/core";
 import {By} from "@angular/platform-browser";
 import {ReactiveFormsModule} from "@angular/forms";
 import {ActivatedRoute, Router} from "@angular/router";
-import {AUTH_SERVICE} from "../services/auth.service";
+import {AUTH_SERVICE, AuthService} from "../services/auth.service";
 import Spy = jasmine.Spy;
 import {RouterStub} from "../../testing/router.stub";
 import createSpyObj = jasmine.createSpyObj;
 import {User} from "../user";
-import {MockRouter} from "../../testing/mock.router";
-import {MockAuthService} from "../testing/mock.auth.service";
+
+import * as TypeMoq from 'typemoq';
+
 
 class LoginPage {
     loginForm: DebugElement;
@@ -61,33 +62,39 @@ class LoginPage {
     }
 }
 
-// describe('A LoginComponent', () => {
-//     let component: LoginComponent;
-//     let fixture: ComponentFixture<LoginComponent>;
-//     let de: DebugElement;
-//     let el: HTMLElement;
-//     let loginPage: LoginPage;
-//     let activatedRoute: ActivatedRoute;
-//
-//     beforeEach(async(() => {
-//         activatedRoute = createSpyObj<ActivatedRoute>('activatedRoute', ['root', 'parent']);
-//         TestBed.configureTestingModule({
-//             imports: [ReactiveFormsModule],
-//             declarations: [LoginComponent],
-//             providers: [
-//                 {provide: AUTH_SERVICE, useClass: MockAuthService},
-//                 {provide: Router, useClass: MockRouter},
-//                 {provide: ActivatedRoute, useValue: activatedRoute}
-//             ]
-//         });
-//     }));
-//
-//     beforeEach(() => {
-//         fixture = TestBed.createComponent(LoginComponent);
-//         component = fixture.componentInstance;
-//         loginPage = new LoginPage(fixture);
-//         fixture.detectChanges(); // calls ngOnInit
-//     });
+describe('A LoginComponent', () => {
+    let component: LoginComponent;
+    let fixture: ComponentFixture<LoginComponent>;
+    let de: DebugElement;
+    let el: HTMLElement;
+    let loginPage: LoginPage;
+    let activatedRoute: ActivatedRoute;
+
+    let mockAuthService: TypeMoq.IMock<AuthService>;
+
+    // beforeEach(async(() => {
+    //
+    //
+    //
+    //
+    //     activatedRoute = createSpyObj<ActivatedRoute>('activatedRoute', ['root', 'parent']);
+    //     TestBed.configureTestingModule({
+    //         imports: [ReactiveFormsModule],
+    //         declarations: [LoginComponent],
+    //         providers: [
+    //             {provide: AUTH_SERVICE, useClass: mockAuthService.object},
+    //             {provide: Router, useClass: MockRouter},
+    //             {provide: ActivatedRoute, useValue: activatedRoute}
+    //         ]
+    //     });
+    // }));
+
+    beforeEach(() => {
+        fixture = TestBed.createComponent(LoginComponent);
+        component = fixture.componentInstance;
+        loginPage = new LoginPage(fixture);
+        fixture.detectChanges(); // calls ngOnInit
+    });
 //
 //     it('should have a title displaying "Log in"', () => {
 //         de = fixture.debugElement.query(By.css('.form-title'));
@@ -219,4 +226,4 @@ class LoginPage {
 //         });
 //     });
 //
-// });
+});

@@ -1,53 +1,55 @@
-import {TestBed} from "@angular/core/testing";
 import {Router} from "@angular/router";
-import {AUTH_SERVICE} from "../auth/services/auth.service";
+import {AuthService} from "../auth/services/auth.service";
 import {HomeGuard} from "./home.guard";
 import Spy = jasmine.Spy;
 import createSpyObj = jasmine.createSpyObj;
 import {MockUser} from "../auth/testing/mock.user";
-import {MockRouter} from "../testing/mock.router";
-import {MockAuthService} from "../auth/testing/mock.auth.service";
+import * as TypeMoq from 'typemoq';
+import {BehaviorSubject} from "rxjs/BehaviorSubject";
+import {User} from "../auth/user";
 
 describe('HomeGuard', () => {
-    let router: Router;
-    let authService: MockAuthService;
+    let mockRouter: TypeMoq.IMock<Router>;
+    let mockAuthService: TypeMoq.IMock<AuthService>;
+    let behavior: BehaviorSubject<User>;
     let authGuard: HomeGuard;
 
     beforeEach(() => {
-        TestBed.configureTestingModule({
-            providers: [
-                {provide: AUTH_SERVICE, useClass: MockAuthService},
-                {provide: Router, useClass: MockRouter}
-            ]
-        });
-        router = TestBed.get(Router);
-        authService = TestBed.get(AUTH_SERVICE);
-        authGuard = new HomeGuard(authService, router);
+        mockAuthService = TypeMoq.Mock.ofType<AuthService>();
+        mockRouter = TypeMoq.Mock.ofType<Router>();
+        behavior = new BehaviorSubject<User>(null);
+        authGuard = new HomeGuard(mockAuthService.object, mockRouter.object);
     });
 
-    it('on canActivate with user logged in return true', () => {
-        authService.setUserLogInStateChangedBehavior(MockUser);
-        spyOn(authService, 'onUserLogInStateChanged').and.callThrough();
+    it('on canActivate with user logged in return true', (done) => {
+        behavior.next(MockUser);
+        mockAuthService.setup(x => x.onUserLogInStateChanged()).returns(() => behavior.asObservable());
+
         authGuard.canActivate().subscribe((activate: boolean) => {
-            expect(authService.onUserLogInStateChanged).toHaveBeenCalledTimes(1);
-            expect(activate).toBeTruthy();
+           mockAuthService.verify(auth => auth.onUserLogInStateChanged(), TypeMoq.Times.once());
+           expect(activate).toBeTruthy();
+           done();
         });
     });
 
-    it('on canActivate with user not logged in returns false', () => {
-        authService.setUserLogInStateChangedBehavior(null);
-        spyOn(authService, 'onUserLogInStateChanged').and.callThrough();
+    it('on canActivate with user not logged in returns false', (done) => {
+        behavior.next(null);
+        mockAuthService.setup(x => x.onUserLogInStateChanged()).returns(() => behavior.asObservable());
+
         authGuard.canActivate().subscribe((activate: boolean) => {
-            expect(authService.onUserLogInStateChanged).toHaveBeenCalledTimes(1);
+            mockAuthService.verify(auth => auth.onUserLogInStateChanged(), TypeMoq.Times.once());
             expect(activate).toBeFalsy();
-        });
+            done();
+        })
     });
 
-    it('on canActivate with user not logged navigates to auth', () => {
-        authService.setUserLogInStateChangedBehavior(null);
-        spyOn(router, 'navigate');
+    it('on canActivate with user not logged navigates to auth', (done) => {
+        behavior.next(null);
+        mockAuthService.setup(x => x.onUserLogInStateChanged()).returns(() => behavior.asObservable());
+
         authGuard.canActivate().subscribe(() => {
-            expect(router.navigate).toHaveBeenCalledWith(['auth']);
+            mockRouter.verify(router => router.navigate(['auth']), TypeMoq.Times.once());
+            done();
         });
     });
 });
