@@ -20,7 +20,7 @@ export class MockAuthService implements AuthService {
     }
 
     logIn(credentials: Credentials): Observable<User> {
-        return this.logInBehavior.asObservable();
+        throw new Error("Method not implemented.");
     }
 
     logOut(): Observable<void> {

@@ -4,13 +4,22 @@ import {DebugElement} from "@angular/core";
 import {By} from "@angular/platform-browser";
 import {ReactiveFormsModule} from "@angular/forms";
 import {ActivatedRoute, Router} from "@angular/router";
-import {AUTH_SERVICE, AuthService} from "../services/auth.service";
+import {AUTH_SERVICE, AuthService, Credentials} from "../services/auth.service";
 import Spy = jasmine.Spy;
 import {RouterStub} from "../../testing/router.stub";
 import createSpyObj = jasmine.createSpyObj;
 import {User} from "../user";
 
 import * as TypeMoq from 'typemoq';
+import {MockRouter} from "../../testing/mock.router";
+import {MockAuthService} from "../testing/mock.auth.service";
+import {MockUser} from "../testing/mock.user";
+import {BehaviorSubject} from "rxjs/BehaviorSubject";
+import {MockActivatedRoute} from "../../testing/mock.activated.route";
+import {inject} from "@angular/core/testing";
+import * as firebase from "firebase/app";
+import Auth = firebase.auth.Auth;
+import {Observable} from "rxjs/Observable";
 
 
 class LoginPage {
@@ -62,32 +71,24 @@ class LoginPage {
     }
 }
 
-describe('A LoginComponent', () => {
+describe('LoginComponent', () => {
     let component: LoginComponent;
     let fixture: ComponentFixture<LoginComponent>;
     let de: DebugElement;
     let el: HTMLElement;
     let loginPage: LoginPage;
-    let activatedRoute: ActivatedRoute;
 
-    let mockAuthService: TypeMoq.IMock<AuthService>;
-
-    // beforeEach(async(() => {
-    //
-    //
-    //
-    //
-    //     activatedRoute = createSpyObj<ActivatedRoute>('activatedRoute', ['root', 'parent']);
-    //     TestBed.configureTestingModule({
-    //         imports: [ReactiveFormsModule],
-    //         declarations: [LoginComponent],
-    //         providers: [
-    //             {provide: AUTH_SERVICE, useClass: mockAuthService.object},
-    //             {provide: Router, useClass: MockRouter},
-    //             {provide: ActivatedRoute, useValue: activatedRoute}
-    //         ]
-    //     });
-    // }));
+    beforeEach(async(() => {
+        TestBed.configureTestingModule({
+            imports: [ReactiveFormsModule],
+            declarations: [LoginComponent],
+            providers: [
+                {provide: AUTH_SERVICE, useClass: MockAuthService},
+                {provide: Router, useClass: MockRouter},
+                {provide: ActivatedRoute, useClass: MockActivatedRoute}
+            ]
+        });
+    }));
 
     beforeEach(() => {
         fixture = TestBed.createComponent(LoginComponent);
@@ -95,45 +96,78 @@ describe('A LoginComponent', () => {
         loginPage = new LoginPage(fixture);
         fixture.detectChanges(); // calls ngOnInit
     });
-//
-//     it('should have a title displaying "Log in"', () => {
-//         de = fixture.debugElement.query(By.css('.form-title'));
-//         el = de.nativeElement;
-//         expect(el.textContent).toContain('Log in');
-//     });
-//
-//     it('should have a button displaying "Log in"', () => {
-//         expect(loginPage.loginButton.nativeElement.textContent).toContain('Log in');
-//     });
-//
-//     it('should have a button displaying "Forgot password"', () => {
-//         expect(loginPage.forgotPasswordButton.nativeElement.textContent).toContain('Forgot my password');
-//     });
-//
-//     it('should have a button displaying "Create your koffi account"', () => {
-//         expect(loginPage.registerButton.nativeElement.textContent).toContain('Create your koffi account');
-//     });
-//
-//     it('should display an error when email not set and user attempts to login', () => {
-//         loginPage.userEntersEmail('').userPressesLogIn();
-//         fixture.detectChanges();
-//         let emailError = fixture.debugElement.query(By.css('#email-error')).nativeElement;
-//         expect(emailError.textContent).toBe('Enter your email address');
-//     });
-//
-//     it('should display an error when password not set and user attempts to login', () => {
-//         loginPage.userEntersPassword('').userPressesLogIn();
-//         fixture.detectChanges();
-//         let passwordError = fixture.debugElement.query(By.css('#password-error')).nativeElement;
-//         expect(passwordError.textContent).toBe('Enter your password');
-//     });
-//
-//     it('should display an error when password not set and user attempts to login', () => {
-//         loginPage.userEntersPassword('').userPressesLogIn();
-//         fixture.detectChanges();
-//         let passwordError = fixture.debugElement.query(By.css('#password-error')).nativeElement;
-//         expect(passwordError.textContent).toBe('Enter your password');
-//     });
+
+    describe('should render', () => {
+        it('a title displaying "Log in"', () => {
+            de = fixture.debugElement.query(By.css('.form-title'));
+            el = de.nativeElement;
+            expect(el.textContent).toContain('Log in');
+        });
+
+        it('a button displaying "Log in"', () => {
+            expect(loginPage.loginButton.nativeElement.textContent).toContain('Log in');
+        });
+
+        it('a button displaying "Forgot password"', () => {
+            expect(loginPage.forgotPasswordButton.nativeElement.textContent).toContain('Forgot my password');
+        });
+
+        it('a button displaying "Create your koffi account"', () => {
+            expect(loginPage.registerButton.nativeElement.textContent).toContain('Create your koffi account');
+        });
+    });
+
+    describe('logIn', () => {
+
+        it('does not call logIn on AuthService and renders email error when user attempts to login without email',
+            inject([AUTH_SERVICE], (authService: AuthService) => {
+                const spy = spyOn(authService, 'logIn');
+
+                loginPage.userEntersPassword('*******').userPressesLogIn();
+                fixture.detectChanges();
+
+                let emailError = fixture.debugElement.query(By.css('#email-error')).nativeElement;
+                expect(emailError.textContent).toBe('Enter your email address');
+                expect(spy.calls.any()).toEqual(false);
+        }));
+
+        it('does not call logIn on AuthService and renders password error when user attempts to login without password',
+            inject([AUTH_SERVICE], (authService: AuthService) => {
+                const spy = spyOn(authService, 'logIn');
+
+                loginPage.userEntersEmail(MockUser.email).userPressesLogIn();
+                fixture.detectChanges();
+
+                let passwordError = fixture.debugElement.query(By.css('#password-error')).nativeElement;
+                expect(passwordError.textContent).toBe('Enter your password');
+                expect(spy.calls.any()).toEqual(false);
+        }));
+
+        it('calls logIn on AuthService and navigates to home when user logs in with correct email and password',
+            inject([AUTH_SERVICE, Router], (authService: AuthService, router: Router) => {
+                 const spyAuthService = spyOn(authService, 'logIn')
+                     .and.returnValue(Observable.create(obs => obs.next(MockUser)));
+                 const spyRouter = spyOn(router, 'navigate');
+
+                 loginPage.userEntersEmail(MockUser.email)
+                     .userEntersPassword('******').userPressesLogIn();
+
+                 expect(spyAuthService).toHaveBeenCalledTimes(1);
+                 expect(spyRouter).toHaveBeenCalledWith(['home']);
+        }));
+
+
+
+
+
+
+
+    })
+
+
+
+
+
 //
 //     describe('calls logIn on AuthService', () => {
 //         const name = 'name';

@@ -89,8 +89,7 @@ export class LoginComponent implements OnInit {
             return;
         }
 
-        let credentials: Credentials;
-        credentials = {
+        let credentials: Credentials = {
             email: this.emailControl.value,
             password: this.passwordControl.value
         };
@@ -101,8 +100,8 @@ export class LoginComponent implements OnInit {
             },
             (err: any) => {
 
-                console.log("WAIT!");
 
+                console.log("WTF2");
 
                 // switch (err) {
                 //     case LogInError.UserNotFound:
@@ -119,7 +118,8 @@ export class LoginComponent implements OnInit {
                 //         this.updateLogInError('There was a problem logging in');
                 //         break;
                 // }
-        });
+        }
+        );
     };
 
     register(): void {
