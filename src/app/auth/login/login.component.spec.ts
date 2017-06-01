@@ -144,16 +144,20 @@ describe('LoginComponent', () => {
         }));
 
         it('calls logIn on AuthService and navigates to home when user logs in with correct email and password',
-            inject([AUTH_SERVICE, Router], (authService: AuthService, router: Router) => {
+            inject([AUTH_SERVICE, Router, ActivatedRoute], 
+            (authService: AuthService, router: Router, route: ActivatedRoute) => {
+
                  const spyAuthService = spyOn(authService, 'logIn')
                      .and.returnValue(Observable.create(obs => obs.next(MockUser)));
                  const spyRouter = spyOn(router, 'navigate');
+                 const spyRoot = spyOnProperty(route, 'root', 'get').and.returnValue("root");
+
 
                  loginPage.userEntersEmail(MockUser.email)
                      .userEntersPassword('******').userPressesLogIn();
 
                  expect(spyAuthService).toHaveBeenCalledTimes(1);
-                 expect(spyRouter).toHaveBeenCalledWith(['home']);
+                 expect(spyRouter).toHaveBeenCalledWith(['home'], {relativeTo: "root"});
         }));
 
 
