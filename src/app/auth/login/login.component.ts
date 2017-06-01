@@ -4,6 +4,9 @@ import {FormGroup, FormBuilder, FormControl, Validators, AbstractControl} from "
 import '../../styles/forms.scss';
 import {AuthService, AUTH_SERVICE, Credentials} from "../services/auth.service";
 import {User} from "../user";
+import { AuthError } from "../errors/auth.error";
+import { UserNotFoundError } from "../errors/user-not-found.error";
+import { WrongPasswordError } from "../errors/wrong-password.error";
 
 @Component({
     moduleId: 'module.id',
@@ -98,27 +101,21 @@ export class LoginComponent implements OnInit {
             (user: User) => {
                 this.router.navigate(['home'], {relativeTo: this.route.root});
             },
-            (err: any) => {
-
-
-                console.log("WTF2");
-
-                // switch (err) {
-                //     case LogInError.UserNotFound:
-                //         this.emailControl.setValue('');
-                //         this.passwordControl.setValue('');
-                //         this.updateFormError('email', 'Sorry, there is no user registered with that email');
-                //         break;
-                //     case LogInError.WrongPasswordError:
-                //         this.passwordControl.setValue('');
-                //         this.updateFormError('email', 'Your password is incorrect');
-                //         break;
-                //     case LogInError.Failed:
-                //         this.passwordControl.setValue('');
-                //         this.updateLogInError('There was a problem logging in');
-                //         break;
-                // }
-        }
+            (err: AuthError) => {
+                switch(err.constructor) {
+                    case UserNotFoundError:
+                        this.emailControl.setValue('');
+                        this.passwordControl.setValue('');
+                        this.updateFormError('email', 'Sorry, there is no user registered with that email');
+                        break;
+                    case WrongPasswordError:
+                        this.passwordControl.setValue('');
+                        this.updateFormError('password', 'Your password is incorrect');
+                        break;
+                    default:
+                        throw new RangeError();
+                };
+            }
         );
     };
 

@@ -9,7 +9,6 @@ import Spy = jasmine.Spy;
 import {RouterStub} from "../../testing/router.stub";
 import createSpyObj = jasmine.createSpyObj;
 import {User} from "../user";
-
 import * as TypeMoq from 'typemoq';
 import {MockRouter} from "../../testing/mock.router";
 import {MockAuthService} from "../testing/mock.auth.service";
@@ -20,6 +19,9 @@ import {inject} from "@angular/core/testing";
 import * as firebase from "firebase/app";
 import Auth = firebase.auth.Auth;
 import {Observable} from "rxjs/Observable";
+import { UserNotFoundError } from "../errors/user-not-found.error";
+import { WrongPasswordError } from "../errors/wrong-password.error";
+import { AuthError } from "../errors/auth.error";
 
 
 class LoginPage {
@@ -53,6 +55,11 @@ class LoginPage {
         this.passwordInput.value = password;
         this.passwordInput.dispatchEvent(new Event('input'));
         return this;
+    }
+
+    userEntersCredentials(credentials: Credentials): LoginPage {
+        return this.userEntersEmail(credentials.email)
+            .userEntersPassword(credentials.password);
     }
 
     userPressesLogIn(): LoginPage {
@@ -118,12 +125,13 @@ describe('LoginComponent', () => {
     });
 
     describe('logIn', () => {
+        let credentials: Credentials = { email: MockUser.email, password: "******" };
 
         it('does not call logIn on AuthService and renders email error when user attempts to login without email',
             inject([AUTH_SERVICE], (authService: AuthService) => {
                 const spy = spyOn(authService, 'logIn');
 
-                loginPage.userEntersPassword('*******').userPressesLogIn();
+                loginPage.userEntersPassword(credentials.password).userPressesLogIn();
                 fixture.detectChanges();
 
                 let emailError = fixture.debugElement.query(By.css('#email-error')).nativeElement;
@@ -135,7 +143,7 @@ describe('LoginComponent', () => {
             inject([AUTH_SERVICE], (authService: AuthService) => {
                 const spy = spyOn(authService, 'logIn');
 
-                loginPage.userEntersEmail(MockUser.email).userPressesLogIn();
+                loginPage.userEntersEmail(credentials.email).userPressesLogIn();
                 fixture.detectChanges();
 
                 let passwordError = fixture.debugElement.query(By.css('#password-error')).nativeElement;
@@ -146,122 +154,61 @@ describe('LoginComponent', () => {
         it('calls logIn on AuthService and navigates to home when user logs in with correct email and password',
             inject([AUTH_SERVICE, Router, ActivatedRoute], 
             (authService: AuthService, router: Router, route: ActivatedRoute) => {
-
                  const spyAuthService = spyOn(authService, 'logIn')
                      .and.returnValue(Observable.create(obs => obs.next(MockUser)));
                  const spyRouter = spyOn(router, 'navigate');
                  const spyRoot = spyOnProperty(route, 'root', 'get').and.returnValue("root");
 
+                 loginPage.userEntersCredentials(credentials).userPressesLogIn();
 
-                 loginPage.userEntersEmail(MockUser.email)
-                     .userEntersPassword('******').userPressesLogIn();
-
-                 expect(spyAuthService).toHaveBeenCalledTimes(1);
+                 expect(spyAuthService).toHaveBeenCalledWith(credentials);
                  expect(spyRouter).toHaveBeenCalledWith(['home'], {relativeTo: "root"});
         }));
 
+        it('calls logIn on AuthService and sets form error and clears input when no user found',
+            inject([AUTH_SERVICE, Router, ActivatedRoute], 
+            (authService: AuthService) => {
+                 const spyAuthService = spyOn(authService, 'logIn')
+                     .and.returnValue(Observable.create(obs => obs.error(new UserNotFoundError())));
+
+                 loginPage.userEntersCredentials(credentials).userPressesLogIn();
+                 fixture.detectChanges();
+
+                 expect(spyAuthService).toHaveBeenCalledWith(credentials);
+                 let emailError = fixture.debugElement.query(By.css('#email-error')).nativeElement;
+                 expect(emailError.textContent).toBe('Sorry, there is no user registered with that email');
+                 expect(loginPage.passwordInput.value).toBe('');
+                 expect(loginPage.emailInput.value).toBe('');
+        }));
+
+        it('calls logIn on AuthService and sets form error and clears password input when password incorrect',
+            inject([AUTH_SERVICE, Router, ActivatedRoute], 
+            (authService: AuthService) => {
+                 const spyAuthService = spyOn(authService, 'logIn')
+                     .and.returnValue(Observable.create(obs => obs.error(new WrongPasswordError())));
+
+                 loginPage.userEntersCredentials(credentials).userPressesLogIn();
+                 fixture.detectChanges();
+
+                 expect(spyAuthService).toHaveBeenCalledWith(credentials);
+                 let passwordError = fixture.debugElement.query(By.css('#password-error')).nativeElement;
+                 expect(passwordError.textContent).toBe('Your password is incorrect');
+                 expect(loginPage.passwordInput.value).toBe('');
+        }));
+
+        it('throws error if error unknown',
+            inject([AUTH_SERVICE, Router, ActivatedRoute], 
+            (authService: AuthService) => {
+                 const spyAuthService = spyOn(authService, 'logIn')
+                     .and.returnValue(Observable.create(obs => obs.error(new AuthError())));
+
+                 loginPage.userEntersCredentials(credentials).userPressesLogIn();
+                 
+                 expect(component.logIn).toThrowError(AuthError);
+
+        }));
 
 
+    });
 
-
-
-
-    })
-
-
-
-
-
-//
-//     describe('calls logIn on AuthService', () => {
-//         const name = 'name';
-//         const email = 'email';
-//         const password = 'password';
-//         let authService: AuthServiceStub;
-//         let authServiceSpy: Spy;
-//         let user: User;
-//
-//         beforeEach(() => {
-//             authService = fixture.debugElement.injector.get(AUTH_SERVICE);
-//             authServiceSpy = spyOn(authService, 'logIn').and.callThrough();
-//             user = {
-//                 name: name,
-//                 email: email,
-//                 uid: 'uid'
-//             };
-//         });
-//
-//         it('0 times if user has not entered email', () => {
-//             loginPage.userEntersEmail('').userEntersPassword('password').userPressesLogIn();
-//             expect(authServiceSpy.calls.any()).toEqual(false);
-//         });
-//
-//         it('0 times if user has not entered password', () => {
-//             loginPage.userEntersEmail('email').userEntersPassword('').userPressesLogIn();
-//             expect(authServiceSpy.calls.any()).toEqual(false);
-//         });
-//
-//         it('0 times if user has not entered email or password', () => {
-//             loginPage.userEntersEmail('').userEntersPassword('').userPressesLogIn();
-//             expect(authServiceSpy.calls.any()).toEqual(false);
-//         });
-//
-//         it('1 time if user has entered email and password', () => {
-//             loginPage.userEntersEmail('email').userEntersPassword('password').userPressesLogIn();
-//             expect(authServiceSpy).toHaveBeenCalledTimes(1);
-//         });
-//
-//         it('and shows log in problem error if log in failed', () => {
-//             authService.setLogInError(LogInError.Failed);
-//             loginPage.userEntersEmail('email').userEntersPassword('password').userPressesLogIn();
-//             fixture.detectChanges();
-//             let passwordError = fixture.debugElement.query(By.css('#login-error')).nativeElement;
-//             expect(passwordError.textContent).toBe('There was a problem logging in');
-//         });
-//
-//         it('and shows log in problem error if log in failed', () => {
-//             authService.setLogInError(LogInError.Failed);
-//             loginPage.userEntersEmail('email').userEntersPassword('password').userPressesLogIn();
-//             fixture.detectChanges();
-//             let passwordError = fixture.debugElement.query(By.css('#login-error')).nativeElement;
-//             expect(passwordError.textContent).toBe('There was a problem logging in');
-//         });
-//
-//         it('and removes entered password if log in failed', () => {
-//             authService.setLogInError(LogInError.Failed);
-//             loginPage.userEntersEmail('email').userEntersPassword('password').userPressesLogIn();
-//             fixture.detectChanges();
-//             expect(loginPage.passwordInput.value).toBe('');
-//         });
-//
-//         describe('and navigates to', () => {
-//             let router: RouterStub;
-//             let routerSpy: Spy;
-//
-//             beforeEach(() => {
-//                 router = fixture.debugElement.injector.get(Router);
-//                 routerSpy = spyOn(router, 'navigate').and.callThrough();
-//             });
-//
-//             it('home when log in successful', () => {
-//                 authService.setLogInResult(user);
-//                 loginPage.userEntersEmail('email').userEntersPassword('password').userPressesLogIn();
-//                 expect(routerSpy).toHaveBeenCalledTimes(1);
-//                 expect(routerSpy).toHaveBeenCalledWith(['home'], {relativeTo: activatedRoute.root});
-//             });
-//
-//             it('register when user has clicked to create an account', () => {
-//                 loginPage.userPressesRegisterButton();
-//                 expect(routerSpy).toHaveBeenCalledTimes(1);
-//                 expect(routerSpy).toHaveBeenCalledWith(['register'], {relativeTo: activatedRoute.parent});
-//             });
-//
-//             it('forgot password when user has clicked forgot password', () => {
-//                 loginPage.userPressesForgotPasswordButton();
-//                 expect(routerSpy).toHaveBeenCalledTimes(1);
-//                 expect(routerSpy).toHaveBeenCalledWith(['forgot-password'], {relativeTo: activatedRoute.parent});
-//             });
-//         });
-//     });
-//
 });

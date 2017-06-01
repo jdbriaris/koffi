@@ -1,16 +1,16 @@
 import {AuthError} from "../errors/auth.error";
-import {UserNameError} from "../errors/username.error";
 import {InvalidEmailError} from "../errors/invalid-email.error";
 import {WrongPasswordError} from "../errors/wrong-password.error";
 import {WeakPasswordError} from "../errors/weak-password.error";
 import {EmailRegisteredError} from "../errors/email-registered.error";
+import {UserNotFoundError} from "../errors/user-not-found.error";
 
 export function mapFirebaseError(firebaseError: firebase.auth.Error) : AuthError {
     let code = firebaseError.code;
     let msg = firebaseError.message;
     switch (code) {
         case 'auth/user-not-found':
-            return new UserNameError(msg);
+            return new UserNotFoundError(msg);
         case 'auth/invalid-email':
             return new InvalidEmailError(msg);
         case 'auth/wrong-password':
