@@ -61,12 +61,12 @@ export class LoginComponent implements OnInit {
 
     private validateForm(): void {
         const form = this.loginForm;
-         for (const field in this.formErrors) {
-             const control: AbstractControl = form.get(field);
-             for (const key in control.errors) {
-                 this.validationMessages[field][key]();
-             }
-         }
+        for (const field in this.formErrors) {
+            const control: AbstractControl = form.get(field);
+            for (const key in control.errors) {
+                this.validationMessages[field][key]();
+            }
+        }
     };
 
     private cleanError(error: string) {
@@ -107,14 +107,14 @@ export class LoginComponent implements OnInit {
                         this.emailControl.setValue('');
                         this.passwordControl.setValue('');
                         this.updateFormError('email', 'Sorry, there is no user registered with that email');
-                        break;
+                        throw err;
                     case WrongPasswordError:
                         this.passwordControl.setValue('');
                         this.updateFormError('password', 'Your password is incorrect');
-                        break;
+                        throw err;
                     default:
-                        throw new RangeError();
-                };
+                        throw err;
+                }
             }
         );
     };
