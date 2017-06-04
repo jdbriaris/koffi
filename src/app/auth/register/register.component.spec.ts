@@ -1,129 +1,181 @@
 import {DebugElement} from "@angular/core";
-import {ComponentFixture, async, TestBed} from "@angular/core/testing";
+import {ComponentFixture, async, TestBed, inject} from "@angular/core/testing";
 import {RegisterComponent} from "./register.component";
 import {By} from "@angular/platform-browser";
 import {ReactiveFormsModule} from "@angular/forms";
-import {AUTH_SERVICE} from "../services/auth.service";
+import {AUTH_SERVICE, AuthService} from "../services/auth.service";
 import {ActivatedRoute, Router} from "@angular/router";
 import {ActivatedRouteStub, RouterStub} from "../../testing/router.stub";
 import Spy = jasmine.Spy;
 import {User} from "../user";
+import {MockAuthService} from "../testing/mock.auth.service";
+import {MockRouter} from "../../testing/mock.router";
+import {MockActivatedRoute} from "../../testing/mock.activated.route";
 
-class RegisterPage {
+//region Test Vars
+let component: RegisterComponent;
+let fixture: ComponentFixture<RegisterComponent>;
+let page: Page;
+//endregion
+
+//region Tests
+describe('RegisterComponent', () => {
+
+    beforeEach(async(() => {
+        TestBed.configureTestingModule({
+            imports: [ReactiveFormsModule],
+            declarations: [RegisterComponent],
+            providers: [
+                {provide: AUTH_SERVICE, useClass: MockAuthService},
+                {provide: Router, useClass: MockRouter},
+                {provide: ActivatedRoute, useClass: MockActivatedRoute}
+            ]
+        }).compileComponents();
+    }));
+
+    beforeEach(async(() => {
+        createComponent();
+    }));
+
+    describe('on initialize should render', initializeTests);
+    describe('when user registers', registerTests);
+    //describe('when user navigates', navigateTests);
+});
+
+function initializeTests(): void {
+    it('a title displaying "Create account"', () => {
+        expect(page.formTitle.textContent).toBe('Create account');
+    });
+
+    it('should have a button displaying "Log in"', () => {
+        expect(page.logInButton.nativeElement.textContent).toBe('Log in');
+    });
+
+    it('should have a button displaying "Create your koffi account"', () => {
+        expect(page.registerButton.nativeElement.textContent).toBe('Create your koffi account');
+    });
+}
+function registerTests(): void {
+
+    describe('with input that', () => {
+
+        //TODO: Find way to iterate over permutations (look @ heaps-permute on npm)
+        it('is empty should display errors and not call AuthService CreateUser',
+            inject([AUTH_SERVICE], (authService: AuthService) => {
+            const spy = spyOn(authService, 'createNewUser');
+
+            page.userEntersEmail('').userEntersName('').userEntersPassword('')
+                .userPressesRegisterButton();
+            fixture.detectChanges();
+
+            page.addPageErrorElements();
+            expect(page.nameError.nativeElement.textContent).toBe('Enter your name');
+            expect(page.emailError.nativeElement.textContent).toBe('Enter your email address');
+            expect(page.passwordError.nativeElement.textContent).toBe('Enter your password');
+            expect(spy.calls.any()).toBeFalsy();
+        }));
+
+        it('has password less than required length should display password error and not call AuthService CreateUser',
+            inject([AUTH_SERVICE], (authService: AuthService) => {
+                const spy = spyOn(authService, 'createNewUser');
+
+                page.userEntersEmail('email').userEntersName('name').userEntersPassword('12345')
+                    .userPressesRegisterButton();
+                fixture.detectChanges();
+
+                page.addPageErrorElements();
+                expect(page.passwordError.nativeElement.textContent).toBe('Password must be at least 6 characters long');
+                expect(spy.calls.any()).toBeFalsy();
+        }));
+
+
+    });
+
+
+
+
+}
+//endregion
+
+//region Helpers
+/** Create RegisterComponent, initialize it and set the test variables */
+function createComponent(): Promise<void> {
+    fixture = TestBed.createComponent(RegisterComponent);
+    component = fixture.componentInstance;
+    page = new Page();
+
+    // Invoke ngOnIt
+    fixture.detectChanges();
+
+    return fixture.whenStable().then(() => {
+        page.addPageElements();
+    });
+}
+
+class Page {
+    formTitle: HTMLElement;
     registerForm: DebugElement;
     nameInput: HTMLInputElement;
     emailInput: HTMLInputElement;
     passwordInput: HTMLInputElement;
     registerButton: DebugElement;
     logInButton: DebugElement;
+    passwordError: DebugElement;
+    emailError: DebugElement;
+    nameError: DebugElement;
 
-    constructor(private fixture: ComponentFixture<RegisterComponent>){
+    public addPageElements(): void {
+        this.formTitle = fixture.debugElement.query(By.css('.form-title')).nativeElement;
         this.registerForm = fixture.debugElement.query(By.css('.form-container'));
         this.nameInput = fixture.debugElement.query(By.css('#name')).nativeElement;
         this.emailInput = fixture.debugElement.query(By.css('#email')).nativeElement;
         this.passwordInput = fixture.debugElement.query(By.css('#password')).nativeElement;
         this.logInButton = fixture.debugElement.query(By.css('#login-button'));
         this.registerButton = fixture.debugElement.query(By.css('#register-button'));
+
     }
 
-    userEntersName(name: string): RegisterPage {
+    public addPageErrorElements(): void {
+        this.passwordError = fixture.debugElement.query(By.css('#password-error'));
+        this.emailError = fixture.debugElement.query(By.css('#email-error'));
+        this.nameError = fixture.debugElement.query(By.css('#name-error'));
+    }
+
+    userEntersName(name: string): Page {
         this.nameInput.value = name;
         this.nameInput.dispatchEvent(new Event('input'));
         return this;
     }
 
-    userEntersEmail(email: string): RegisterPage {
+    userEntersEmail(email: string): Page {
         this.emailInput.value = email;
         this.emailInput.dispatchEvent(new Event('input'));
         return this;
     }
 
-    userEntersPassword(password: string): RegisterPage {
+    userEntersPassword(password: string): Page {
         this.passwordInput.value = password;
         this.passwordInput.dispatchEvent(new Event('input'));
         return this;
     }
 
-    userPressesLogIn(): RegisterPage {
+    userPressesLogIn(): Page {
         this.logInButton.triggerEventHandler('click', null);
         return this;
     }
 
-    userPressesRegisterButton(): RegisterPage {
+    userPressesRegisterButton(): Page {
         this.registerForm.triggerEventHandler('ngSubmit', this.registerForm);
         return this;
     }
 }
+//endregion
 
-// describe('A RegisterComponent', () => {
-//     let component: RegisterComponent;
-//     let fixture: ComponentFixture<RegisterComponent>;
-//     let de: DebugElement;
-//     let el: HTMLElement;
-//     let registerPage: RegisterPage;
+
 //
-//     beforeEach(async(() => {
-//         TestBed.configureTestingModule({
-//             imports: [ReactiveFormsModule],
-//             declarations: [RegisterComponent],
-//             providers: [
-//                 {provide: AUTH_SERVICE, useClass: AuthServiceStub},
-//                 {provide: Router, useClass: RouterStub},
-//                 {provide: ActivatedRoute, useClass: ActivatedRouteStub}
-//             ]
-//         });
-//     }));
+
 //
-//     beforeEach(() => {
-//         fixture = TestBed.createComponent(RegisterComponent);
-//         component = fixture.componentInstance;
-//         registerPage = new RegisterPage(fixture);
-//         fixture.detectChanges(); // calls ngOnInit
-//     });
-//
-//     it('should have a title displaying "Create account"', () => {
-//         de = fixture.debugElement.query(By.css('.form-title'));
-//         el = de.nativeElement;
-//         expect(el.textContent).toContain('Create account');
-//     });
-//
-//     it('should have a button displaying "Log in"', () => {
-//         expect(registerPage.logInButton.nativeElement.textContent).toContain('Log in');
-//     });
-//
-//     it('should have a button displaying "Create your koffi account"', () => {
-//         expect(registerPage.registerButton.nativeElement.textContent).toContain('Create your koffi account');
-//     });
-//
-//     it('should display errors when inputs not set and user registers', () => {
-//         registerPage
-//             .userEntersEmail('')
-//             .userEntersName('')
-//             .userEntersPassword('')
-//             .userPressesRegisterButton();
-//         fixture.detectChanges();
-//
-//         let nameError = fixture.debugElement.query(By.css('#name-error')).nativeElement;
-//         expect(nameError.textContent).toBe('Enter your name');
-//
-//         let emailError = fixture.debugElement.query(By.css('#email-error')).nativeElement;
-//         expect(emailError.textContent).toBe('Enter your email address');
-//
-//         let passwordError = fixture.debugElement.query(By.css('#password-error')).nativeElement;
-//         expect(passwordError.textContent).toBe('Enter your password');
-//     });
-//
-//     it('should display error when password is less than required length and user registers', () => {
-//         registerPage
-//             .userEntersEmail('email')
-//             .userEntersName('name')
-//             .userEntersPassword('12345')
-//             .userPressesRegisterButton();
-//         fixture.detectChanges();
-//
-//         let passwordError = fixture.debugElement.query(By.css('#password-error')).nativeElement;
-//         expect(passwordError.textContent).toBe('Password must be at least 6 characters long');
-//     });
+
 //
 //     describe('calls createNewUser on AuthService', () => {
 //         let authService: AuthServiceStub;

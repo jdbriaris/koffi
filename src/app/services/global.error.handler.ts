@@ -12,9 +12,6 @@ export class GlobalErrorHandler implements ErrorHandler {
             console.log('Bye');
         }
 
-
-
-       // throw error;
     };
 }
 

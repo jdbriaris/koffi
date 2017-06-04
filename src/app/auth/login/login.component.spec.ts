@@ -6,14 +6,10 @@ import {ReactiveFormsModule} from "@angular/forms";
 import {ActivatedRoute, Router} from "@angular/router";
 import {AUTH_SERVICE, AuthService, Credentials} from "../services/auth.service";
 import Spy = jasmine.Spy;
-import {RouterStub} from "../../testing/router.stub";
 import createSpyObj = jasmine.createSpyObj;
-import {User} from "../user";
-import * as TypeMoq from 'typemoq';
 import {MockRouter} from "../../testing/mock.router";
 import {MockAuthService} from "../testing/mock.auth.service";
 import {MockUser} from "../testing/mock.user";
-import {BehaviorSubject} from "rxjs/BehaviorSubject";
 import {MockActivatedRoute} from "../../testing/mock.activated.route";
 import {inject} from "@angular/core/testing";
 import * as firebase from "firebase/app";
@@ -24,7 +20,7 @@ import { WrongPasswordError } from "../errors/wrong-password.error";
 import { AuthError } from "../errors/auth.error";
 import 'rxjs/add/observable/throw';
 
-//region Test Variables
+//region Test Vars
 let component: LoginComponent;
 let fixture: ComponentFixture<LoginComponent>;
 let page: Page;
@@ -54,7 +50,7 @@ describe('LoginComponent', () => {
     describe('when user navigates', navigateTests);
 });
 
-function renderTests() {
+function renderTests(): void {
     it('a title displaying "Log in"', () => {
         expect(page.formTitle.textContent).toBe('Log in');
     });
@@ -71,7 +67,7 @@ function renderTests() {
         expect(page.registerButton.nativeElement.textContent).toContain('Create your koffi account');
     });
 }
-function logInTests() {
+function logInTests(): void {
     let credentials: Credentials = { email: MockUser.email, password: "******" };
 
     it('without email does not call logIn on AuthService and renders email error',
@@ -166,7 +162,7 @@ function logInTests() {
         expect(component.logIn.bind(component)).toThrowError(AuthError);
     }));
 }
-function navigateTests() {
+function navigateTests(): void {
     it('to register by pressing register button',
         inject([Router, ActivatedRoute], (router: Router, route: ActivatedRoute) => {
             const spyRouter = spyOn(router, 'navigate');
@@ -212,7 +208,7 @@ class Page {
     emailInput: HTMLInputElement;
     passwordInput: HTMLInputElement;
 
-    public addPageElements() {
+    public addPageElements(): void {
         this.formTitle = fixture.debugElement.query(By.css('.form-title')).nativeElement;
         this.loginForm = fixture.debugElement.query(By.css('.form-container'));
         this.loginButton = fixture.debugElement.query(By.css('#login-button'));

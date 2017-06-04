@@ -3,6 +3,10 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {FormGroup, FormBuilder, Validators, FormControl, AbstractControl} from "@angular/forms";
 import '../../styles/forms.scss';
 import {AuthService, AUTH_SERVICE, Credentials} from "../services/auth.service";
+import {AuthError} from "../errors/auth.error";
+import {EmailRegisteredError} from "../errors/email-registered.error";
+import {InvalidEmailError} from "../errors/invalid-email.error";
+import {WeakPasswordError} from "../errors/weak-password.error";
 
 @Component({
     moduleId: 'module.id',
@@ -94,26 +98,23 @@ export class RegisterComponent implements OnInit {
                 () => {
                     this.router.navigate(['/home']);
                 },
-                //TODO
-                // (err: CreateUserError) => {
-                //     switch (err) {
-                //         case CreateUserError.EmailAlreadyRegistered:
-                //             this.router.navigate(['/register-review', this.emailControl.value]);
-                //             break;
-                //         case CreateUserError.InvalidEmail:
-                //             this.passwordControl.setValue('');
-                //             this.updateFormError('email', 'Enter a valid email address');
-                //             break;
-                //         case CreateUserError.WeakPassword:
-                //             this.passwordControl.setValue('');
-                //             this.updateFormError('password', 'Enter a stronger password');
-                //             break;
-                //         case CreateUserError.Failed:
-                //             this.router.navigate(['/error']);
-                //             break;
-                //     }
-                // }
-                );
+                (err: AuthError) => {
+                    switch (err.constructor) {
+                        case EmailRegisteredError:
+                            this.router.navigate(['/register-review', this.emailControl.value]);
+                            break;
+                        case InvalidEmailError:
+                            this.passwordControl.setValue('');
+                            this.updateFormError('email', 'Enter a valid email address');
+                            break;
+                        case WeakPasswordError:
+                            this.passwordControl.setValue('');
+                            this.updateFormError('password', 'Enter a stronger password');
+                            break;
+                        default:
+                            throw err;
+                    }
+                });
     };
 
     private validateForm() {
