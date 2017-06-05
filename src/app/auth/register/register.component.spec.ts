@@ -11,6 +11,9 @@ import {User} from "../user";
 import {MockAuthService} from "../testing/mock.auth.service";
 import {MockRouter} from "../../testing/mock.router";
 import {MockActivatedRoute} from "../../testing/mock.activated.route";
+var binaryVariations = require('binary-variations');
+
+
 
 //region Test Vars
 let component: RegisterComponent;
@@ -55,9 +58,41 @@ function initializeTests(): void {
         expect(page.registerButton.nativeElement.textContent).toBe('Create your koffi account');
     });
 }
+
+function writeFoo(foo: string): void {
+    console.log('foo = ' + foo);
+}
+
+function writeBar(bar: string): void {
+    console.log('bar = ' + bar);
+}
+
 function registerTests(): void {
 
     describe('with input that', () => {
+
+
+        let scenarios = [
+            [() => writeFoo('foo1'), () => writeBar('bar1')],
+            [() => writeFoo('foo2'), () => writeBar('bar2')],
+            [() => writeFoo('foo3'), () => writeBar('bar3')]
+        ];
+
+
+        it('does something', () => {
+            binaryVariations(scenarios, s => {
+
+                let e = scenarios.filter(x => s.indexOf(x) < 0);
+
+                s.forEach(x => x[0]());
+                e.forEach(t => t[1]());
+            })
+        });
+
+
+
+
+
 
         //TODO: Find way to iterate over permutations (look @ heaps-permute on npm)
         it('is empty should display errors and not call AuthService CreateUser',
