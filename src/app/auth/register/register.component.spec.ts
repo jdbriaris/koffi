@@ -11,6 +11,7 @@ import {User} from "../user";
 import {MockAuthService} from "../testing/mock.auth.service";
 import {MockRouter} from "../../testing/mock.router";
 import {MockActivatedRoute} from "../../testing/mock.activated.route";
+import { MockUser } from "../testing/mock.user";
 var binaryVariations = require('binary-variations');
 
 
@@ -46,26 +47,26 @@ describe('RegisterComponent', () => {
 });
 
 function initializeTests(): void {
-    it('a title displaying "Create account"', () => {
-        expect(page.formTitle.textContent).toBe('Create account');
-    });
+    // it('a title displaying "Create account"', () => {
+    //     expect(page.formTitle.textContent).toBe('Create account');
+    // });
 
-    it('should have a button displaying "Log in"', () => {
-        expect(page.logInButton.nativeElement.textContent).toBe('Log in');
-    });
+    // it('should have a button displaying "Log in"', () => {
+    //     expect(page.logInButton.nativeElement.textContent).toBe('Log in');
+    // });
 
-    it('should have a button displaying "Create your koffi account"', () => {
-        expect(page.registerButton.nativeElement.textContent).toBe('Create your koffi account');
-    });
+    // it('should have a button displaying "Create your koffi account"', () => {
+    //     expect(page.registerButton.nativeElement.textContent).toBe('Create your koffi account');
+    // });
 }
 
-function writeFoo(foo: string): void {
-    console.log('foo = ' + foo);
-}
+// function writeFoo(foo: string): void {
+//     console.log('foo = ' + foo);
+// }
 
-function writeBar(bar: string): void {
-    console.log('bar = ' + bar);
-}
+// function writeBar(bar: string): void {
+//     console.log('bar = ' + bar);
+// }
 
 function registerTests(): void {
 
@@ -73,55 +74,69 @@ function registerTests(): void {
 
 
         let scenarios = [
-            [() => writeFoo('foo1'), () => writeBar('bar1')],
-            [() => writeFoo('foo2'), () => writeBar('bar2')],
-            [() => writeFoo('foo3'), () => writeBar('bar3')]
+            [() => page.userEntersEmail(MockUser.email), () => expect(page.emailError.nativeElement.textContent).toBe('Enter your email address')],
+            [() => page.userEntersName(MockUser.name), () => expect(page.nameError.nativeElement.textContent).toBe('Enter your name')],
+            [() => page.userEntersPassword('******'), () => expect(page.passwordError.nativeElement.textContent).toBe('Enter your password')]
         ];
 
-
-        it('does something', () => {
-            binaryVariations(scenarios, s => {
-
+        binaryVariations(scenarios, s => {
+                // Get the compliment of scenarios
                 let e = scenarios.filter(x => s.indexOf(x) < 0);
 
-                s.forEach(x => x[0]());
-                e.forEach(t => t[1]());
-            })
-        });
+                it('does this...',
+                    inject([AUTH_SERVICE], (authService: AuthService) => {
+                    const spy = spyOn(authService, 'createNewUser');
 
+                    s.forEach(x => x[0]());
+                    page.userPressesRegisterButton();                    
 
+                    
+                    if(e.length > 0) 
+                    {
+                        fixture.detectChanges();
+                        page.addPageErrorElements();
+                        e.forEach(t => t[1]());
+                        expect(spy.calls.any()).toBeFalsy();
+                    }
+                    else 
+                    {
+                        expect(spy.calls.any()).toBeTruthy();
+                    }
 
+                    
+                }));
 
+            });
 
 
         //TODO: Find way to iterate over permutations (look @ heaps-permute on npm)
-        it('is empty should display errors and not call AuthService CreateUser',
-            inject([AUTH_SERVICE], (authService: AuthService) => {
-            const spy = spyOn(authService, 'createNewUser');
+        // it('is empty should display errors and not call AuthService CreateUser',
+        //     inject([AUTH_SERVICE], (authService: AuthService) => {
+        //     const spy = spyOn(authService, 'createNewUser');
 
-            page.userEntersEmail('').userEntersName('').userEntersPassword('')
-                .userPressesRegisterButton();
-            fixture.detectChanges();
+        //     page.userEntersEmail('').userEntersName('').userEntersPassword('')
+        //         .userPressesRegisterButton();
+        //     fixture.detectChanges();
 
-            page.addPageErrorElements();
-            expect(page.nameError.nativeElement.textContent).toBe('Enter your name');
-            expect(page.emailError.nativeElement.textContent).toBe('Enter your email address');
-            expect(page.passwordError.nativeElement.textContent).toBe('Enter your password');
-            expect(spy.calls.any()).toBeFalsy();
-        }));
+        //     page.addPageErrorElements();
+        //     expect(page.nameError.nativeElement.textContent).toBe('Enter your name');
+        //     expect(page.emailError.nativeElement.textContent).toBe('Enter your email address');
+        //     expect(page.passwordError.nativeElement.textContent).toBe('Enter your password');
+        //     expect(spy.calls.any()).toBeFalsy();
+        // }));
 
-        it('has password less than required length should display password error and not call AuthService CreateUser',
-            inject([AUTH_SERVICE], (authService: AuthService) => {
-                const spy = spyOn(authService, 'createNewUser');
+        // it('has password less than required length should display password error and not call AuthService CreateUser',
+        //     inject([AUTH_SERVICE], (authService: AuthService) => {
+        //         const spy = spyOn(authService, 'createNewUser');
 
-                page.userEntersEmail('email').userEntersName('name').userEntersPassword('12345')
-                    .userPressesRegisterButton();
-                fixture.detectChanges();
+        //         page.userEntersEmail('email').userEntersName('name').userEntersPassword('12345')
+        //             .userPressesRegisterButton();
+        //         fixture.detectChanges();
 
-                page.addPageErrorElements();
-                expect(page.passwordError.nativeElement.textContent).toBe('Password must be at least 6 characters long');
-                expect(spy.calls.any()).toBeFalsy();
-        }));
+        //         page.addPageErrorElements();
+        //         expect(page.passwordError.nativeElement.textContent).toBe('Password must be at least 6 characters long');
+        //         expect(spy.calls.any()).toBeFalsy();
+        // }));
 
 
     });
@@ -177,18 +192,21 @@ class Page {
     }
 
     userEntersName(name: string): Page {
+        console.log("User enters name: " + name);
         this.nameInput.value = name;
         this.nameInput.dispatchEvent(new Event('input'));
         return this;
     }
 
     userEntersEmail(email: string): Page {
+        console.log("User enters email: " + email);
         this.emailInput.value = email;
         this.emailInput.dispatchEvent(new Event('input'));
         return this;
     }
 
     userEntersPassword(password: string): Page {
+        console.log("User enters password: " + password);
         this.passwordInput.value = password;
         this.passwordInput.dispatchEvent(new Event('input'));
         return this;
@@ -200,6 +218,7 @@ class Page {
     }
 
     userPressesRegisterButton(): Page {
+        console.log("User presses register");
         this.registerForm.triggerEventHandler('ngSubmit', this.registerForm);
         return this;
     }
