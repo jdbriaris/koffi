@@ -72,56 +72,38 @@ function registerTests(): void {
     describe('with input that', () => {
 
 
-        let scenarios = [
-            [() => writeFoo('foo1'), () => writeBar('bar1')],
-            [() => writeFoo('foo2'), () => writeBar('bar2')],
-            [() => writeFoo('foo3'), () => writeBar('bar3')]
-        ];
-
-
-        it('does something', () => {
-            binaryVariations(scenarios, s => {
-
-                let e = scenarios.filter(x => s.indexOf(x) < 0);
-
-                s.forEach(x => x[0]());
-                e.forEach(t => t[1]());
-            })
-        });
 
 
 
 
-
-
-        //TODO: Find way to iterate over permutations (look @ heaps-permute on npm)
-        it('is empty should display errors and not call AuthService CreateUser',
-            inject([AUTH_SERVICE], (authService: AuthService) => {
-            const spy = spyOn(authService, 'createNewUser');
-
-            page.userEntersEmail('').userEntersName('').userEntersPassword('')
-                .userPressesRegisterButton();
-            fixture.detectChanges();
-
-            page.addPageErrorElements();
-            expect(page.nameError.nativeElement.textContent).toBe('Enter your name');
-            expect(page.emailError.nativeElement.textContent).toBe('Enter your email address');
-            expect(page.passwordError.nativeElement.textContent).toBe('Enter your password');
-            expect(spy.calls.any()).toBeFalsy();
-        }));
-
-        it('has password less than required length should display password error and not call AuthService CreateUser',
-            inject([AUTH_SERVICE], (authService: AuthService) => {
-                const spy = spyOn(authService, 'createNewUser');
-
-                page.userEntersEmail('email').userEntersName('name').userEntersPassword('12345')
-                    .userPressesRegisterButton();
-                fixture.detectChanges();
-
-                page.addPageErrorElements();
-                expect(page.passwordError.nativeElement.textContent).toBe('Password must be at least 6 characters long');
-                expect(spy.calls.any()).toBeFalsy();
-        }));
+        // //TODO: Find way to iterate over permutations (look @ heaps-permute on npm)
+        // it('is empty should display errors and not call AuthService CreateUser',
+        //     inject([AUTH_SERVICE], (authService: AuthService) => {
+        //     const spy = spyOn(authService, 'createNewUser');
+        //
+        //     page.userEntersEmail('').userEntersName('').userEntersPassword('')
+        //         .userPressesRegisterButton();
+        //     fixture.detectChanges();
+        //
+        //     page.addPageErrorElements();
+        //     expect(page.nameError.nativeElement.textContent).toBe('Enter your name');
+        //     expect(page.emailError.nativeElement.textContent).toBe('Enter your email address');
+        //     expect(page.passwordError.nativeElement.textContent).toBe('Enter your password');
+        //     expect(spy.calls.any()).toBeFalsy();
+        // }));
+        //
+        // it('has password less than required length should display password error and not call AuthService CreateUser',
+        //     inject([AUTH_SERVICE], (authService: AuthService) => {
+        //         const spy = spyOn(authService, 'createNewUser');
+        //
+        //         page.userEntersEmail('email').userEntersName('name').userEntersPassword('12345')
+        //             .userPressesRegisterButton();
+        //         fixture.detectChanges();
+        //
+        //         page.addPageErrorElements();
+        //         expect(page.passwordError.nativeElement.textContent).toBe('Password must be at least 6 characters long');
+        //         expect(spy.calls.any()).toBeFalsy();
+        // }));
 
 
     });
