@@ -9,10 +9,14 @@ export interface Credentials {
     password: string
 }
 
+export interface NewUserCredentials extends Credentials {
+    name: string;
+}
+
 export interface AuthService {
     logIn(credentials: Credentials): Observable<User>;
     logOut(): Observable<void>;
-    createNewUser(newUser: Credentials): Observable<User>;
+    createNewUser(newUser: NewUserCredentials): Observable<User>;
     resetPassword(email: string): Observable<void>;
     onUserLogInStateChanged(): Observable<User>;
 }

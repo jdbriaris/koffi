@@ -2,7 +2,7 @@ import {Component, OnInit, NgZone, Inject} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {FormGroup, FormBuilder, Validators, FormControl, AbstractControl} from "@angular/forms";
 import '../../styles/forms.scss';
-import {AuthService, AUTH_SERVICE, Credentials} from "../services/auth.service";
+import {AuthService, AUTH_SERVICE, Credentials, NewUserCredentials} from "../services/auth.service";
 import {AuthError} from "../errors/auth.error";
 import {EmailRegisteredError} from "../errors/email-registered.error";
 import {InvalidEmailError} from "../errors/invalid-email.error";
@@ -89,19 +89,20 @@ export class RegisterComponent implements OnInit {
         this.formErrors[error] = '';
     }
 
-    register(credentials: Credentials): void {
+    register(credentials: NewUserCredentials): void {
         this.validateForm();
         if (this.registerForm.invalid) return;
 
         this.authService.createNewUser(credentials)
             .subscribe(
                 () => {
-                    this.router.navigate(['/home']);
+                    this.router.navigate(['home'], {relativeTo: this.route.root});
                 },
                 (err: AuthError) => {
                     switch (err.constructor) {
                         case EmailRegisteredError:
-                            this.router.navigate(['/register-review', this.emailControl.value]);
+                            this.router.navigate(['register-review', this.emailControl.value],
+                                {relativeTo: this.route.parent});
                             break;
                         case InvalidEmailError:
                             this.passwordControl.setValue('');

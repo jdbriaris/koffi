@@ -4,7 +4,7 @@ import * as firebase from 'firebase';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/delay';
-import { AuthService, Credentials } from "./auth.service";
+import {AuthService, Credentials, NewUserCredentials} from "./auth.service";
 import {FIREBASE_AUTH} from "./firebase.auth.provider";
 import Auth = firebase.auth.Auth;
 import FirebaseUser = firebase.User;
@@ -66,7 +66,7 @@ export class FirebaseAuthService implements AuthService {
         });
     };
 
-    createNewUser(credentials: Credentials): Observable<User> {
+    createNewUser(credentials: NewUserCredentials): Observable<User> {
         return Observable.create(obs => {
             this.firebaseApp.createUserWithEmailAndPassword(credentials.email, credentials.password)
                 .then((res: FirebaseUser) => {
