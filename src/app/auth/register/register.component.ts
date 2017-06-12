@@ -111,8 +111,10 @@ export class RegisterComponent implements OnInit {
                         case WeakPasswordError:
                             this.passwordControl.setValue('');
                             this.updateFormError('password', 'Enter a stronger password');
+                            console.log("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
                             break;
                         default:
+                        console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
                             throw err;
                     }
                 });

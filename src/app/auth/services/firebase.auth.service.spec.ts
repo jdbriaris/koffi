@@ -6,7 +6,7 @@ import Error = firebase.auth.Error;
 import * as TypeMoq from 'typemoq';
 import {User} from "../user";
 import {MockUser} from "../testing/mock.user";
-import {Credentials} from "./auth.service";
+import { Credentials, NewUserCredentials } from "./auth.service";
 import {AuthError} from "../errors/auth.error";
 import {MockNgZone} from "../../testing/mock.ngzone";
 
@@ -86,10 +86,10 @@ describe('FirebaseAuthService', () => {
     });
 
     describe('createNewUser', () => {
-        let credentials: Credentials;
+        let credentials: NewUserCredentials;
 
         beforeEach(() => {
-            credentials = {email: MockUser.email, password: '******'};
+            credentials = {email: MockUser.email, name: MockUser.name, password: '******'};
         });
 
         it('returns user when firebase createUserWithEmailAndPassword returns firebase user', (done) => {

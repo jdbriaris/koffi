@@ -13,6 +13,8 @@ import {MockUser} from "../testing/mock.user";
 import {Observable} from "rxjs/Observable";
 import {EmailRegisteredError} from "../errors/email-registered.error";
 import {InvalidEmailError} from "../errors/invalid-email.error";
+import { WeakPasswordError } from "../errors/weak-password.error";
+import { AuthError } from "../errors/auth.error";
 
 
 //region Test Vars
@@ -42,7 +44,7 @@ describe('RegisterComponent', () => {
 
     describe('on initialize should render', initializeTests);
     describe('when user registers', registerTests);
-    //describe('when user navigates', navigateTests);
+    describe('when user presses logIn', logInTests);
 });
 
 function initializeTests(): void {
@@ -190,7 +192,7 @@ function registerTests(): void {
                 inject([AUTH_SERVICE, Router, ActivatedRoute],
                     (authService: AuthService, router: Router, route: ActivatedRoute) => {
                     const spyAuthService = spyOn(authService, 'createNewUser')
-                        .and.returnValue(Observable.create(obs => obs.error(new EmailRegisteredError())));
+                        .and.returnValue(Observable.throw(new EmailRegisteredError()));
                     const spyRouter = spyOn(router, 'navigate');
                     spyOnProperty(route, 'parent', 'get').and.returnValue("parent");
 
@@ -206,7 +208,7 @@ function registerTests(): void {
             it('should display email error when AuthService createNewUser returns InvalidEmailError',
                 inject([AUTH_SERVICE], (authService: AuthService) => {
                     const spyAuthService = spyOn(authService, 'createNewUser')
-                        .and.returnValue(Observable.create(obs => obs.error(new InvalidEmailError())));
+                        .and.returnValue(Observable.throw(new InvalidEmailError()));
 
                     page.userEntersEmail(credentials.email).userEntersName(MockUser.name)
                         .userEntersPassword(credentials.password).userPressesRegisterButton();
@@ -214,16 +216,48 @@ function registerTests(): void {
 
                     page.addPageErrorElements();
                     expect(spyAuthService).toHaveBeenCalledWith(credentials);
-                    expect(page.formError.nativeElement.textContent).toBe('Enter a valid email address');
+                    expect(page.emailError.nativeElement.textContent).toBe('Enter a valid email address');
+            }));
 
-                }));
+            it('should display email error when AuthService createNewUser returns WeakPasswordError',
+                inject([AUTH_SERVICE], (authService: AuthService) => {
+                    const spyAuthService = spyOn(authService, 'createNewUser')
+                        .and.returnValue(Observable.throw(new WeakPasswordError()));
 
+                    page.userEntersEmail(credentials.email).userEntersName(MockUser.name)
+                        .userEntersPassword(credentials.password).userPressesRegisterButton();
+                    fixture.detectChanges();
 
+                    page.addPageErrorElements();
+                    expect(spyAuthService).toHaveBeenCalledWith(credentials);
+                    expect(page.passwordError.nativeElement.textContent).toBe('Enter a stronger password');
+            }));
+
+            it('should rethrow error when AuthService createNewUser returns AuthError',
+                inject([AUTH_SERVICE], (authService: AuthService) => {
+                    const spyAuthService = spyOn(authService, 'createNewUser')
+                        .and.returnValue(Observable.throw(new AuthError));
+
+                    page.userEntersEmail(credentials.email).userEntersName(MockUser.name)
+                    .userEntersPassword(credentials.password);
+
+                    expect(component.register.bind(component)).toThrowError(AuthError);
+            }));
         });
+}
 
+function logInTests(): void {
+    let credentials: NewUserCredentials = { email: MockUser.email, name: MockUser.name, password: "******" };
 
+    it('should navigate to login screen',
+        inject([Router, ActivatedRoute], (router: Router, route: ActivatedRoute) => {
+            const spyRouter = spyOn(router, 'navigate');
+            spyOnProperty(route, 'parent', 'get').and.returnValue("parent");
 
-        it('with password, email and name, and ')
+            page.userPressesLogIn();
+
+            expect(spyRouter).toHaveBeenCalledWith(['login'], {relativeTo: "parent"});
+    }));
 }
 //endregion
 
@@ -253,7 +287,6 @@ class Page {
     passwordError: DebugElement;
     emailError: DebugElement;
     nameError: DebugElement;
-    formError: DebugElement;
 
     public addPageElements(): void {
         this.formTitle = fixture.debugElement.query(By.css('.form-title')).nativeElement;
@@ -269,25 +302,21 @@ class Page {
         this.passwordError = fixture.debugElement.query(By.css('#password-error'));
         this.emailError = fixture.debugElement.query(By.css('#email-error'));
         this.nameError = fixture.debugElement.query(By.css('#name-error'));
-        this.formError = fixture.debugElement.query(By.css('#form-error'));
     }
 
     userEntersName(name: string): Page {
-        console.log("User enters name: " + name);
         this.nameInput.value = name;
         this.nameInput.dispatchEvent(new Event('input'));
         return this;
     }
 
     userEntersEmail(email: string): Page {
-        console.log("User enters email: " + email);
         this.emailInput.value = email;
         this.emailInput.dispatchEvent(new Event('input'));
         return this;
     }
 
     userEntersPassword(password: string): Page {
-        console.log("User enters password: " + password);
         this.passwordInput.value = password;
         this.passwordInput.dispatchEvent(new Event('input'));
         return this;
@@ -299,7 +328,6 @@ class Page {
     }
 
     userPressesRegisterButton(): Page {
-        console.log("User presses register");
         this.registerForm.triggerEventHandler('ngSubmit', this.registerForm);
         return this;
     }
