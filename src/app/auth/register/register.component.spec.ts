@@ -3,7 +3,7 @@ import {ComponentFixture, async, TestBed, inject} from "@angular/core/testing";
 import {RegisterComponent} from "./register.component";
 import {By} from "@angular/platform-browser";
 import {ReactiveFormsModule} from "@angular/forms";
-import {AUTH_SERVICE, AuthService, Credentials, NewUserCredentials} from "../services/auth.service";
+import {AUTH_SERVICE, AuthService, NewUserCredentials} from "../services/auth.service";
 import {ActivatedRoute, Router} from "@angular/router";
 import Spy = jasmine.Spy;
 import {MockAuthService} from "../testing/mock.auth.service";
@@ -13,7 +13,6 @@ import {MockUser} from "../testing/mock.user";
 import {Observable} from "rxjs/Observable";
 import {EmailRegisteredError} from "../errors/email-registered.error";
 import {InvalidEmailError} from "../errors/invalid-email.error";
-
 
 
 //region Test Vars
@@ -274,18 +273,21 @@ class Page {
     }
 
     userEntersName(name: string): Page {
+        console.log("User enters name: " + name);
         this.nameInput.value = name;
         this.nameInput.dispatchEvent(new Event('input'));
         return this;
     }
 
     userEntersEmail(email: string): Page {
+        console.log("User enters email: " + email);
         this.emailInput.value = email;
         this.emailInput.dispatchEvent(new Event('input'));
         return this;
     }
 
     userEntersPassword(password: string): Page {
+        console.log("User enters password: " + password);
         this.passwordInput.value = password;
         this.passwordInput.dispatchEvent(new Event('input'));
         return this;
@@ -297,139 +299,9 @@ class Page {
     }
 
     userPressesRegisterButton(): Page {
+        console.log("User presses register");
         this.registerForm.triggerEventHandler('ngSubmit', this.registerForm);
         return this;
     }
 }
-//endregion
 
-
-//
-
-//
-
-//
-//     describe('calls createNewUser on AuthService', () => {
-//         let authService: AuthServiceStub;
-//         let createUserSpy: Spy;
-//         let logInSpy: Spy;
-//         const name = 'name';
-//         const email = 'email';
-//         const password = 'password';
-//         let newUser: NewUser;
-//         let user: User;
-//
-//         beforeEach(() => {
-//             authService = fixture.debugElement.injector.get(AUTH_SERVICE);
-//             createUserSpy = spyOn(authService, 'createNewUser').and.callThrough();
-//             logInSpy = spyOn(authService, 'logIn');
-//             newUser = {
-//                 name: name,
-//                 email: email,
-//                 password: password
-//             };
-//             user = {
-//                 name: name,
-//                 email: email,
-//                 uid: 'uid'
-//             };
-//         });
-//
-//         it('0 times if user has not set inputs and registers', () => {
-//             registerPage
-//                 .userEntersEmail('')
-//                 .userEntersPassword('')
-//                 .userEntersName('')
-//                 .userPressesRegisterButton();
-//             expect(createUserSpy.calls.any()).toEqual(false);
-//         });
-//
-//         it('1 time if user has set inputs and registers', () => {
-//             registerPage
-//                 .userEntersEmail(email)
-//                 .userEntersPassword(password)
-//                 .userEntersName(name)
-//                 .userPressesRegisterButton();
-//             expect(createUserSpy).toHaveBeenCalledTimes(1);
-//             expect(createUserSpy).toHaveBeenCalledWith(newUser);
-//         });
-//
-//         it('and shows error if user entered invalid email', () => {
-//             authService.setCreateUserError(CreateUserError.InvalidEmail);
-//             registerPage
-//                 .userEntersEmail(email)
-//                 .userEntersPassword(password)
-//                 .userEntersName(name)
-//                 .userPressesRegisterButton();
-//             fixture.detectChanges();
-//             let emailError = fixture.debugElement.query(By.css('#email-error')).nativeElement;
-//             expect(emailError.textContent).toBe('Enter a valid email address');
-//             expect(registerPage.passwordInput.value).toBe('');
-//         });
-//
-//         it('and shows error if user entered invalid password', () => {
-//             authService.setCreateUserError(CreateUserError.WeakPassword);
-//             registerPage
-//                 .userEntersEmail(email)
-//                 .userEntersPassword(password)
-//                 .userEntersName(name)
-//                 .userPressesRegisterButton();
-//             fixture.detectChanges();
-//             let passwordError = fixture.debugElement.query(By.css('#password-error')).nativeElement;
-//             expect(passwordError.textContent).toBe('Enter a stronger password');
-//             expect(registerPage.passwordInput.value).toBe('');
-//         });
-//
-//         //TODO
-//         // describe('and navigates to', () => {
-//         //     let router: RouterStub;
-//         //     let routerSpy: Spy;
-//         //     let activatedRoute: ActivatedRouteStub;
-//         //
-//         //     beforeEach(() => {
-//         //         activatedRoute = fixture.debugElement.injector.get(ActivatedRoute);
-//         //         router = fixture.debugElement.injector.get(Router);
-//         //         routerSpy = spyOn(router, 'navigate').and.callThrough();
-//         //     });
-//         //
-//         //     it('home when user successfully created', () => {
-//         //         authService.setCreateUserResult(user);
-//         //         registerPage
-//         //             .userEntersEmail(email)
-//         //             .userEntersPassword(password)
-//         //             .userEntersName(name)
-//         //             .userPressesRegisterButton();
-//         //         expect(routerSpy).toHaveBeenCalledTimes(1);
-//         //         expect(routerSpy).toHaveBeenCalledWith(['/home']);
-//         //     });
-//         //
-//         //     it('error when user creation failed', () => {
-//         //         authService.setCreateUserError(CreateUserError.Failed);
-//         //         registerPage
-//         //             .userEntersEmail(email)
-//         //             .userEntersPassword(password)
-//         //             .userEntersName(name)
-//         //             .userPressesRegisterButton();
-//         //         expect(routerSpy).toHaveBeenCalledTimes(1);
-//         //         expect(routerSpy).toHaveBeenCalledWith(['/error']);
-//         //     });
-//         //
-//         //     it('register review when user successfully created', () => {
-//         //         authService.setCreateUserError(CreateUserError.EmailAlreadyRegistered);
-//         //         registerPage
-//         //             .userEntersEmail(email)
-//         //             .userEntersPassword(password)
-//         //             .userEntersName(name)
-//         //             .userPressesRegisterButton();
-//         //         expect(routerSpy).toHaveBeenCalledTimes(1);
-//         //         expect(routerSpy).toHaveBeenCalledWith(['/register-review', email]);
-//         //     });
-//         //
-//         //     it('log in when user presses log in button', () => {
-//         //         registerPage.userPressesLogIn();
-//         //         expect(routerSpy).toHaveBeenCalledTimes(1);
-//         //         expect(routerSpy).toHaveBeenCalledWith(['login'], {relativeTo: activatedRoute.parent});
-//         //     });
-//         // });
-//     });
-// });
