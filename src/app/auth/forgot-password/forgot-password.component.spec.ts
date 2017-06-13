@@ -4,142 +4,172 @@ import {ForgotPasswordComponent} from "./forgot-password.component";
 import {By} from "@angular/platform-browser";
 import {RouterStub} from "../../testing/router.stub";
 import {Router} from "@angular/router";
-import {AUTH_SERVICE} from "../services/auth.service";
+import { AUTH_SERVICE, AuthService } from "../services/auth.service";
 import {ReactiveFormsModule} from "@angular/forms";
 import Spy = jasmine.Spy;
+import { MockAuthService } from "../testing/mock.auth.service";
+import { MockRouter } from "../../testing/mock.router";
+import { inject } from "@angular/core/testing";
+import { Observable } from "rxjs/Observable";
+import { InvalidEmailError } from "../errors/invalid-email.error";
+import { UserNotFoundError } from "../errors/user-not-found.error";
+import { AuthError } from "../errors/auth.error";
 
-class ForgotPasswordPage {
+//region Test Vars
+let component: ForgotPasswordComponent;
+let fixture: ComponentFixture<ForgotPasswordComponent>;
+let page: Page;
+//endregion
+
+//region Tests
+describe('ForgotPasswordComponent', () => {
+
+    beforeEach(async(() => {
+        TestBed.configureTestingModule({
+            imports: [ReactiveFormsModule],
+            declarations: [ForgotPasswordComponent],
+            providers: [
+                {provide: AUTH_SERVICE, useClass: MockAuthService},
+                {provide: Router, useClass: MockRouter}
+            ]
+        }).compileComponents();
+    }));
+
+    beforeEach(async(() => {
+        createComponent();
+    }));
+
+    describe('on initialize should render', initializeTests);
+    describe('when user presses continue', forgotPasswordTests);
+});
+
+function initializeTests(): void {
+    it('a title displaying "Create account"', () => {
+        expect(page.formTitle.textContent).toBe('Reset Password');
+    });
+
+    it('should have a button displaying "Continue"', () => {
+        expect(page.continueButton.nativeElement.textContent).toBe('Continue');
+    });
+}
+
+function forgotPasswordTests(): void {
+
+    it('with no email, should display error, clear input and not call resetPassword on AuthService', 
+        inject([AUTH_SERVICE], (authService: AuthService) => {
+            const spy = spyOn(authService, 'resetPassword');
+
+            page.userPressesContinue();
+            fixture.detectChanges();
+
+            page.addPageErrorElements();
+            expect(page.emailError.nativeElement.textContent).toBe('Enter your email address');
+            expect(page.emailInput.value).toBe('');
+            expect(spy.calls.any()).toBeFalsy();
+    }));
+
+    describe('with email, calls AuthService resetPassword', () => {
+
+        it('and displays error when resetPassword returns InvalidEmailError', 
+            inject([AUTH_SERVICE], (authService: AuthService) => {
+                const spy = spyOn(authService, 'resetPassword')
+                .and.returnValue(Observable.throw(new InvalidEmailError));
+
+                let invalidEmail = 'invalid@email.com';
+
+                page.userEntersEmail(invalidEmail).userPressesContinue();
+                fixture.detectChanges();
+
+                page.addPageErrorElements();
+                expect(page.emailError.nativeElement.textContent).toBe('Enter a valid email address');
+                expect(page.emailInput.value).toBe('');
+                expect(spy).toHaveBeenCalledWith(invalidEmail);
+        }));
+
+        it('and displays error when resetPassword returns UserNotFoundError', 
+            inject([AUTH_SERVICE], (authService: AuthService) => {
+                const spy = spyOn(authService, 'resetPassword')
+                .and.returnValue(Observable.throw(new UserNotFoundError));
+
+                let invalidEmail = 'no@user.com';
+
+                page.userEntersEmail(invalidEmail).userPressesContinue();
+                fixture.detectChanges();
+
+                page.addPageErrorElements();
+                expect(page.emailError.nativeElement.textContent).toBe('Sorry, there is no user registered with that email');
+                expect(page.emailInput.value).toBe('');
+                expect(spy).toHaveBeenCalledWith(invalidEmail);
+        }));
+
+        it('should rethrow error when resetPassword returns AuthError',
+            inject([AUTH_SERVICE], (authService: AuthService) => {
+                const spyAuthService = spyOn(authService, 'resetPassword')
+                    .and.returnValue(Observable.throw(new AuthError));
+
+                let invalidEmail = 'no@user.com';
+                page.userEntersEmail(invalidEmail);
+
+                expect(component.continue.bind(component)).toThrowError(AuthError);
+        }));
+
+    });
+
+
+
+    
+
+
+
+
+
+}
+//endregion
+
+//region Helpers
+/** Create the LoginComponent, initialize it and set the test variables  */
+function createComponent(): Promise<void> {
+    fixture = TestBed.createComponent(ForgotPasswordComponent);
+    component = fixture.componentInstance;
+    page = new Page();
+
+    // Invoke ngOnIt
+    fixture.detectChanges();
+
+    return fixture.whenStable().then(() => {
+        page.addPageElements();
+    });
+}
+
+class Page {
+    formTitle: HTMLElement;
     resetPasswordForm: DebugElement;
     emailInput: HTMLInputElement;
+    emailError: DebugElement;
     continueButton: DebugElement;
 
-    constructor(private fixture: ComponentFixture<ForgotPasswordComponent>){
-        this.queryDomElements(fixture);
-    }
-
-    private queryDomElements(fixture: ComponentFixture<ForgotPasswordComponent>) {
+    public addPageElements(): void {
+        this.formTitle = fixture.debugElement.query(By.css('.form-title')).nativeElement;
         this.resetPasswordForm = fixture.debugElement.query(By.css('.form-container'));
         this.emailInput = fixture.debugElement.query(By.css('#email')).nativeElement;
-        this.continueButton = fixture.debugElement.query(By.css('#continue-button'));
+        this.continueButton = fixture.debugElement.query(By.css('#continue-button'));       
     }
 
-    userEntersEmail(email: string): ForgotPasswordPage {
+    public addPageErrorElements(): void {
+        this.emailError = fixture.debugElement.query(By.css('#email-error'));
+    }
+
+    userEntersEmail(email: string): Page {
         this.emailInput.value = email;
         this.emailInput.dispatchEvent(new Event('input'));
         return this;
     }
 
-    userPressesContinue(): ForgotPasswordPage {
+    userPressesContinue(): Page {
         this.resetPasswordForm.triggerEventHandler('ngSubmit', this.resetPasswordForm);
         return this;
     }
 }
+//endregion
 
 
-// describe('ForgotPasswordComponent', () => {
-//     let component: ForgotPasswordComponent;
-//     let fixture: ComponentFixture<ForgotPasswordComponent>;
-//     let page: ForgotPasswordPage;
-//     let de: DebugElement;
-//     let el: HTMLElement;
-//
-//     beforeEach(async(() => {
-//         TestBed.configureTestingModule({
-//             imports: [ReactiveFormsModule],
-//             declarations: [ForgotPasswordComponent],
-//             providers: [
-//                 {provide: AUTH_SERVICE, useClass: AuthServiceStub},
-//                 {provide: Router, useClass: RouterStub}
-//             ]
-//         });
-//     }));
-//
-//     beforeEach(() => {
-//         fixture = TestBed.createComponent(ForgotPasswordComponent);
-//         component = fixture.componentInstance;
-//         page = new ForgotPasswordPage(fixture);
-//         fixture.detectChanges(); // calls ngOnInit
-//     });
-//
-//     it('should have a title displaying "Reset Password"', () => {
-//         de = fixture.debugElement.query(By.css('.form-title'));
-//         el = de.nativeElement;
-//         expect(el.textContent).toContain('Reset Password');
-//     });
-//
-//     it('should have a button displaying "Continue"', () => {
-//         expect(page.continueButton.nativeElement.textContent).toContain('Continue');
-//     });
-//
-//     it('should display an error when email not set and user attempts to continue', () => {
-//         page.userEntersEmail('').userPressesContinue();
-//         fixture.detectChanges();
-//         let emailError = fixture.debugElement.query(By.css('#email-error')).nativeElement;
-//         expect(emailError.textContent).toBe('Enter your email address');
-//     });
-//
-//     describe('calls resetPassword on AuthService', () => {
-//         let authService: AuthServiceStub;
-//         let authServiceSpy: Spy;
-//
-//         beforeEach(() => {
-//             authService = fixture.debugElement.injector.get(AUTH_SERVICE);
-//             authServiceSpy = spyOn(authService, 'resetPassword').and.callThrough();
-//         });
-//
-//         it('0 times if user enters an invalid email', () => {
-//             page.userEntersEmail('').userPressesContinue();
-//             expect(authServiceSpy.calls.any()).toBeFalsy();
-//         });
-//
-//         it('shows invalid email error if AuthService returns invalid email', () => {
-//             authService.setResetPasswordError(ResetPasswordError.InvalidEmail);
-//             page.userEntersEmail('some invalid email').userPressesContinue();
-//             fixture.detectChanges();
-//             let emailError = fixture.debugElement.query(By.css('#email-error')).nativeElement;
-//             expect(emailError.textContent).toBe('Enter a valid email address');
-//         });
-//
-//         it('removes email input if AuthService returns invalid email', () => {
-//             authService.setResetPasswordError(ResetPasswordError.InvalidEmail);
-//             page.userEntersEmail('some invalid email').userPressesContinue();
-//             fixture.detectChanges();
-//             expect(page.emailInput.value).toBe('');
-//         });
-//
-//         it('clears invalid email error if AuthService returns invalid email and user starts entering new email', () => {
-//             authService.setResetPasswordError(ResetPasswordError.InvalidEmail);
-//             page.userEntersEmail('some invalid email').userPressesContinue();
-//             fixture.detectChanges();
-//             page.userEntersEmail('s');
-//             fixture.detectChanges();
-//             expect(fixture.debugElement.query(By.css('#email-error'))).toBeNull();
-//         });
-//
-//         it('shows user not found error if AuthService returns user not found', () => {
-//             authService.setResetPasswordError(ResetPasswordError.UserNotFound);
-//             page.userEntersEmail('someone@somewhere.com').userPressesContinue();
-//             fixture.detectChanges();
-//             let emailError = fixture.debugElement.query(By.css('#email-error')).nativeElement;
-//             expect(emailError.textContent).toBe('Sorry, there is no user registered with that email');
-//         });
-//
-//         it('removes email input if AuthService returns user not found', () => {
-//             authService.setResetPasswordError(ResetPasswordError.UserNotFound);
-//             page.userEntersEmail('someone@somewhere.com').userPressesContinue();
-//             fixture.detectChanges();
-//             expect(page.emailInput.value).toBe('');
-//         });
-//
-//         it('clears user not found error if AuthService returns invalid email and user starts entering new email', () => {
-//             authService.setResetPasswordError(ResetPasswordError.UserNotFound);
-//             page.userEntersEmail('someone@somewhere.com').userPressesContinue();
-//             fixture.detectChanges();
-//             page.userEntersEmail('s');
-//             fixture.detectChanges();
-//             expect(fixture.debugElement.query(By.css('#email-error'))).toBeNull();
-//         });
-//
-//     })
-//
-// });

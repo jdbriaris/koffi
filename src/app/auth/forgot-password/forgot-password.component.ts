@@ -3,6 +3,9 @@ import {FormGroup, FormBuilder, FormControl, Validators, AbstractControl} from "
 import {Router} from "@angular/router";
 import '../../styles/forms.scss';
 import {AuthService, AUTH_SERVICE} from "../services/auth.service";
+import { AuthError } from "../errors/auth.error";
+import { InvalidEmailError } from "../errors/invalid-email.error";
+import { UserNotFoundError } from "../errors/user-not-found.error";
 
 @Component({
     moduleId: 'module.id',
@@ -29,7 +32,7 @@ export class ForgotPasswordComponent implements OnInit {
     ){}
 
     ngOnInit(): void {
-            this.buildForm();
+        this.buildForm();
     };
 
     private buildForm(): void {
@@ -74,20 +77,22 @@ export class ForgotPasswordComponent implements OnInit {
 
         this.authService.resetPassword(this.emailControl.value)
             .subscribe(
+                //TODO - determine where to direct the user here
                 () => {},
-                //TODO
-                // (err: ResetPasswordError) => {
-                //     switch (err) {
-                //         case ResetPasswordError.InvalidEmail:
-                //             this.emailControl.setValue('');
-                //             this.updateFormError('email', 'Enter a valid email address');
-                //             break;
-                //         case ResetPasswordError.UserNotFound:
-                //             this.emailControl.setValue('');
-                //             this.updateFormError('email', 'Sorry, there is no user registered with that email');
-                //             break;
-                //     }
-                // }
+                (err: AuthError) => {
+                    switch (err.constructor) {
+                        case InvalidEmailError:
+                            this.emailControl.setValue('');
+                            this.updateFormError('email', 'Enter a valid email address');
+                            break;
+                        case UserNotFoundError:
+                            this.emailControl.setValue('');
+                            this.updateFormError('email', 'Sorry, there is no user registered with that email');
+                            break;
+                        default:
+                            throw err;
+                    }
+                }
                 );
     };
 }
