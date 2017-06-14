@@ -16,7 +16,6 @@ import {InvalidEmailError} from "../errors/invalid-email.error";
 import { WeakPasswordError } from "../errors/weak-password.error";
 import { AuthError } from "../errors/auth.error";
 
-
 //region Test Vars
 let component: RegisterComponent;
 let fixture: ComponentFixture<RegisterComponent>;
@@ -235,7 +234,7 @@ function registerTests(): void {
 
             it('should rethrow error when AuthService createNewUser returns AuthError',
                 inject([AUTH_SERVICE], (authService: AuthService) => {
-                    const spyAuthService = spyOn(authService, 'createNewUser')
+                    spyOn(authService, 'createNewUser')
                         .and.returnValue(Observable.throw(new AuthError));
 
                     page.userEntersEmail(credentials.email).userEntersName(MockUser.name)
@@ -247,8 +246,6 @@ function registerTests(): void {
 }
 
 function logInTests(): void {
-    let credentials: NewUserCredentials = { email: MockUser.email, name: MockUser.name, password: "******" };
-
     it('should navigate to login screen',
         inject([Router, ActivatedRoute], (router: Router, route: ActivatedRoute) => {
             const spyRouter = spyOn(router, 'navigate');
@@ -296,40 +293,40 @@ class Page {
         this.passwordInput = fixture.debugElement.query(By.css('#password')).nativeElement;
         this.logInButton = fixture.debugElement.query(By.css('#login-button'));
         this.registerButton = fixture.debugElement.query(By.css('#register-button'));
-    }
+    };
 
     public addPageErrorElements(): void {
         this.passwordError = fixture.debugElement.query(By.css('#password-error'));
         this.emailError = fixture.debugElement.query(By.css('#email-error'));
         this.nameError = fixture.debugElement.query(By.css('#name-error'));
-    }
+    };
 
     userEntersName(name: string): Page {
         this.nameInput.value = name;
         this.nameInput.dispatchEvent(new Event('input'));
         return this;
-    }
+    };
 
     userEntersEmail(email: string): Page {
         this.emailInput.value = email;
         this.emailInput.dispatchEvent(new Event('input'));
         return this;
-    }
+    };
 
     userEntersPassword(password: string): Page {
         this.passwordInput.value = password;
         this.passwordInput.dispatchEvent(new Event('input'));
         return this;
-    }
+    };
 
     userPressesLogIn(): Page {
         this.logInButton.triggerEventHandler('click', null);
         return this;
-    }
+    };
 
     userPressesRegisterButton(): Page {
         this.registerForm.triggerEventHandler('ngSubmit', this.registerForm);
         return this;
-    }
+    };
 }
-
+//endregion
