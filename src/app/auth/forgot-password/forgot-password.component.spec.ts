@@ -2,7 +2,6 @@ import {DebugElement} from "@angular/core";
 import {ComponentFixture, TestBed, async} from "@angular/core/testing";
 import {ForgotPasswordComponent} from "./forgot-password.component";
 import {By} from "@angular/platform-browser";
-import {RouterStub} from "../../testing/router.stub";
 import {Router} from "@angular/router";
 import { AUTH_SERVICE, AuthService } from "../services/auth.service";
 import {ReactiveFormsModule} from "@angular/forms";
